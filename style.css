@@ -1,0 +1,1004 @@
+/* =========================================
+   ديرتي - نظام فواتير السائقين
+   تصميم أسود وذهبي احترافي
+   ========================================= */
+
+:root {
+  --gold: #d7b56d;
+  --gold-light: #f2d99b;
+  --gold-dark: #98743c;
+  --bg: #101112;
+  --panel: #1b1c1e;
+  --panel-light: #242629;
+  --input: #141517;
+  --border: #37383b;
+  --text: #f6f4ee;
+  --muted: #a8a8a8;
+  --green: #218653;
+  --red: #bd3535;
+  --radius: 14px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  direction: rtl;
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: Tahoma, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+button {
+  border: 1px solid var(--gold-dark);
+  border-radius: 9px;
+  padding: 10px 15px;
+  color: #17130d;
+  background: linear-gradient(
+    135deg,
+    var(--gold-light),
+    var(--gold)
+  );
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+button:hover {
+  opacity: 0.93;
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+button.secondary {
+  color: var(--text);
+  background: var(--panel-light);
+  border-color: var(--border);
+}
+
+button.danger {
+  color: #fff;
+  background: var(--red);
+  border-color: var(--red);
+}
+
+button.green {
+  color: #fff;
+  background: var(--green);
+  border-color: var(--green);
+}
+
+button.small {
+  padding: 5px 9px;
+  font-size: 12px;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* رأس الصفحة */
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 15px;
+  padding: 16px 4%;
+  background: #181512;
+  border-bottom: 1px solid #4a3b24;
+  box-shadow: 0 5px 22px #0004;
+}
+
+.brand-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-mark {
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  border: 2px solid var(--gold);
+  border-radius: 14px;
+  background: #292116;
+  color: var(--gold-light);
+  font-size: 31px;
+  font-weight: bold;
+}
+
+.brand {
+  color: var(--gold-light);
+  font-size: 25px;
+  font-weight: 900;
+  line-height: 1.5;
+}
+
+.brand span {
+  display: block;
+  font-size: 12px;
+  color: #ddd0b1;
+  font-weight: normal;
+}
+
+.sub {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.top-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.install-btn {
+  background: linear-gradient(135deg, #f3dfaa, #c69a43);
+}
+
+/* المحتوى العام */
+
+.wrap {
+  max-width: 1500px;
+  margin: auto;
+  padding: 20px;
+}
+
+.notice {
+  margin-bottom: 18px;
+  padding: 12px 15px;
+  background: #202017;
+  border: 1px solid #5d4b2d;
+  border-radius: 10px;
+  color: #e8d5a4;
+  font-size: 13px;
+}
+
+/* الإحصائيات */
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 13px;
+  margin-bottom: 20px;
+}
+
+.stat {
+  padding: 17px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: linear-gradient(145deg, #222325, #191a1c);
+  box-shadow: 0 5px 18px #0002;
+}
+
+.stat span {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.stat strong {
+  display: block;
+  margin: 7px 0 2px;
+  color: var(--gold-light);
+  font-size: 23px;
+  overflow-wrap: anywhere;
+}
+
+.stat small {
+  color: #777;
+  font-size: 11px;
+}
+
+/* شريط التنقل */
+
+.tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+  padding-bottom: 13px;
+  border-bottom: 1px solid var(--border);
+}
+
+.tabs button {
+  flex: 1 1 auto;
+  min-width: 120px;
+}
+
+/* الصناديق */
+
+.box {
+  min-width: 0;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--panel);
+  box-shadow: 0 5px 20px #0002;
+}
+
+.box h2 {
+  margin: 0 0 15px;
+  color: var(--gold-light);
+  font-size: 21px;
+}
+
+.box h3 {
+  margin: 0;
+  color: var(--gold-light);
+  font-size: 18px;
+}
+
+.muted {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.footnote {
+  margin-bottom: 0;
+}
+
+/* شاشة الكاشير */
+
+.cashier-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 18px;
+  margin-bottom: 18px;
+}
+
+.cashier-head p {
+  margin: 5px 0 0;
+}
+
+.driver-picker {
+  display: flex;
+  align-items: end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.driver-picker label {
+  min-width: 200px;
+  margin: 0;
+}
+
+.cashier-layout {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.85fr) minmax(0, 1.5fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.products-box,
+.invoice-box {
+  min-width: 0;
+}
+
+.section-title,
+.invoice-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.live-tag {
+  padding: 4px 9px;
+  color: var(--gold-light);
+  background: #39301f;
+  border: 1px solid #66502d;
+  border-radius: 30px;
+  font-size: 11px;
+}
+
+.search {
+  margin-bottom: 13px;
+}
+
+.quick-items {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.quick-item {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: stretch;
+  gap: 10px;
+  min-height: 86px;
+  padding: 12px;
+  color: var(--text);
+  text-align: right;
+  background: linear-gradient(145deg, #292a2c, #1c1d1f);
+  border: 1px solid #48413a;
+  border-radius: 12px;
+}
+
+.quick-item:hover {
+  border-color: var(--gold);
+  box-shadow: 0 0 13px #d7b56d20;
+}
+
+.item-name {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px;
+  font-weight: bold;
+  overflow-wrap: anywhere;
+}
+
+.plus {
+  color: var(--gold-light);
+  font-size: 20px;
+}
+
+.item-price {
+  color: var(--gold-light);
+  font-size: 14px;
+}
+
+.quick-footer {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--border);
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.eyebrow {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.autosave {
+  color: #6fd39c;
+  font-size: 11px;
+}
+
+/* الحقول */
+
+label {
+  display: block;
+  margin-bottom: 13px;
+  color: #ddd;
+  font-size: 13px;
+}
+
+input,
+select {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  min-height: 43px;
+  margin-top: 5px;
+  padding: 9px 11px;
+  color: var(--text);
+  background: var(--input);
+  border: 1px solid #44464a;
+  border-radius: 8px;
+  outline: none;
+}
+
+input:focus,
+select:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 2px #d7b56d16;
+}
+
+input::placeholder {
+  color: #777;
+}
+
+select {
+  cursor: pointer;
+}
+
+input[type="number"] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* الجداول */
+
+.table-wrap,
+.scroll {
+  width: 100%;
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+th {
+  padding: 11px 8px;
+  color: var(--gold-light);
+  background: #28251f;
+  border-bottom: 1px solid #51432b;
+  text-align: right;
+  white-space: nowrap;
+}
+
+td {
+  padding: 10px 8px;
+  border-bottom: 1px solid #333538;
+  vertical-align: middle;
+}
+
+tbody tr:hover {
+  background: #ffffff05;
+}
+
+.empty {
+  padding: 22px 10px;
+  color: var(--muted);
+  text-align: center;
+}
+
+/* الكمية والسعر داخل الفاتورة */
+
+.invoice-table {
+  min-width: 440px;
+}
+
+.invoice-table td:first-child {
+  min-width: 90px;
+  overflow-wrap: anywhere;
+}
+
+.qty-input,
+.price-input {
+  width: 62px;
+  min-width: 55px;
+  min-height: 36px;
+  margin: 0;
+  padding: 5px;
+  border-radius: 6px;
+  text-align: center;
+  direction: ltr;
+  font-weight: bold;
+}
+
+.qty-input {
+  color: var(--gold-light);
+}
+
+.price-input {
+  color: #fff;
+}
+
+.line-sum {
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+/* إجمالي الفاتورة */
+
+.invoice-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-top: 18px;
+  padding: 17px;
+  border: 1px solid #6a5430;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #2c261b, #211d17);
+}
+
+.invoice-summary > span {
+  color: #e5d6b8;
+  font-weight: bold;
+}
+
+.invoice-summary strong {
+  color: var(--gold-light);
+  font-size: 27px;
+  white-space: nowrap;
+}
+
+.invoice-summary small {
+  font-size: 13px;
+}
+
+.invoice-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.invoice-actions button {
+  flex: 1 1 auto;
+}
+
+/* الفاتورة المستقلة */
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.formgrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.total {
+  margin: 18px 0;
+  padding: 15px;
+  color: var(--gold-light);
+  background: #292319;
+  border-radius: 10px;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.total span {
+  font-size: 24px;
+}
+
+.help-card p {
+  line-height: 2;
+}
+
+/* الإجراءات */
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.close-btn {
+  color: #fff;
+  background: linear-gradient(135deg, #218653, #17633d);
+  border-color: #278b59;
+}
+
+.print-btn {
+  color: #17130d;
+  background: linear-gradient(135deg, #f2d99b, #c39e6a);
+}
+
+/* رسالة أسفل الشاشة */
+
+#toast {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  bottom: 20px;
+  right: 50%;
+  transform: translateX(50%);
+  max-width: calc(100% - 30px);
+  padding: 12px 20px;
+  color: #17130d;
+  background: var(--gold-light);
+  border-radius: 10px;
+  box-shadow: 0 8px 30px #0007;
+  font-weight: bold;
+  text-align: center;
+}
+
+/* =========================================
+   تصميم الفاتورة الحرارية 80 مم
+   ========================================= */
+
+#printArea {
+  display: none;
+}
+
+.receipt {
+  width: 72mm;
+  max-width: 72mm;
+  margin: 0 auto;
+  padding: 2mm 1mm;
+  background: #fff;
+  color: #111;
+  font-family: Tahoma, Arial, sans-serif;
+  font-size: 10px;
+  line-height: 1.6;
+  direction: rtl;
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+
+.receipt * {
+  box-sizing: border-box;
+}
+
+.receipt-brand {
+  padding-bottom: 9px;
+  text-align: center;
+  border-bottom: 1px solid #333;
+}
+
+.receipt-brand .r-logo {
+  width: 35px;
+  height: 35px;
+  display: grid;
+  place-items: center;
+  margin: 0 auto 4px;
+  border: 1.5px solid #111;
+  border-radius: 50%;
+  font-size: 23px;
+  font-weight: bold;
+}
+
+.receipt-brand h2 {
+  margin: 0;
+  color: #111;
+  font-size: 17px;
+  font-weight: 900;
+}
+
+.receipt-brand p {
+  margin: 2px 0;
+  font-size: 10px;
+}
+
+.receipt-title {
+  margin: 10px 0;
+  padding: 7px 2px;
+  border-bottom: 1px dashed #333;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 900;
+  overflow-wrap: anywhere;
+}
+
+.receipt-meta {
+  display: block;
+  width: 100%;
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+  border-bottom: 1px dashed #333;
+}
+
+.receipt-meta .r-meta-row {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 2px;
+  width: 100%;
+  margin: 7px 0;
+  line-height: 1.7;
+}
+
+.receipt-meta .r-meta-row > span {
+  color: #555;
+  font-size: 10px;
+}
+
+.receipt-meta .r-meta-row strong {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  color: #111;
+  font-size: 12px;
+  font-weight: bold;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+
+.receipt-meta .r-meta-row .r-driver-name {
+  padding: 4px 0;
+  border-bottom: 1px dotted #bbb;
+  font-size: 15px;
+  line-height: 1.8;
+}
+
+.receipt-meta .r-meta-row .r-date {
+  direction: rtl;
+  font-size: 10px;
+  overflow-wrap: anywhere;
+}
+
+.receipt .r-note {
+  margin: 7px 0;
+  padding: 5px;
+  border: 1px dashed #777;
+  overflow-wrap: anywhere;
+}
+
+.receipt table {
+  width: 100%;
+  table-layout: auto;
+  border-collapse: collapse;
+  font-size: 9px;
+}
+
+.receipt th {
+  padding: 5px 2px;
+  color: #111;
+  background: #eee;
+  border-bottom: 1px solid #333;
+  text-align: right;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.receipt td {
+  padding: 6px 2px;
+  color: #111;
+  border-bottom: 1px dotted #aaa;
+  text-align: right;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.receipt .r-item-name {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.receipt .r-count {
+  padding: 8px 0;
+  border-bottom: 1px solid #333;
+  text-align: center;
+  font-weight: bold;
+}
+
+.receipt .r-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 5px;
+  margin-top: 10px;
+  padding: 10px 2px;
+  border-top: 2px solid #111;
+  border-bottom: 2px solid #111;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.receipt .r-total span:last-child {
+  white-space: nowrap;
+}
+
+.receipt .r-thanks {
+  margin-top: 13px;
+  padding-top: 8px;
+  border-top: 1px dashed #777;
+  text-align: center;
+  font-size: 11px;
+  font-weight: bold;
+}
+
+.receipt .r-thanks small {
+  font-size: 9px;
+  font-weight: normal;
+}
+
+/* =========================================
+   الطباعة
+   ========================================= */
+
+@media print {
+  @page {
+    size: 80mm auto;
+    margin: 3mm;
+  }
+
+  html,
+  body {
+    width: 74mm !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  body * {
+    visibility: hidden !important;
+  }
+
+  #printArea,
+  #printArea * {
+    visibility: visible !important;
+  }
+
+  #printArea {
+    display: block !important;
+    position: absolute !important;
+    top: 0 !important;
+    right: 0 !important;
+    width: 74mm !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+  }
+
+  .receipt {
+    display: block !important;
+    width: 72mm !important;
+    max-width: 72mm !important;
+    margin: 0 auto !important;
+    padding: 1mm !important;
+    background: #fff !important;
+    color: #000 !important;
+    font-size: 10px !important;
+    overflow: visible !important;
+  }
+
+  .receipt table {
+    width: 100% !important;
+  }
+
+  .receipt th,
+  .receipt td {
+    color: #000 !important;
+  }
+}
+
+/* =========================================
+   الشاشات الصغيرة
+   ========================================= */
+
+@media (max-width: 1000px) {
+  .cashier-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .topbar {
+    padding: 13px;
+  }
+
+  .brand {
+    font-size: 21px;
+  }
+
+  .top-actions {
+    width: 100%;
+  }
+
+  .top-actions button {
+    flex: 1 1 140px;
+  }
+
+  .wrap {
+    padding: 12px;
+  }
+
+  .stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
+  }
+
+  .stat {
+    padding: 12px;
+  }
+
+  .stat strong {
+    font-size: 19px;
+  }
+
+  .tabs {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .tabs button {
+    min-width: 0;
+    padding: 10px 5px;
+    font-size: 12px;
+  }
+
+  .box {
+    padding: 14px;
+  }
+
+  .cashier-head {
+    align-items: stretch;
+  }
+
+  .driver-picker {
+    align-items: stretch;
+  }
+
+  .driver-picker label {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+
+  .quick-items {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .quick-item {
+    min-height: 76px;
+    padding: 10px;
+  }
+
+  .formgrid,
+  .row {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .invoice-summary {
+    padding: 12px;
+  }
+
+  .invoice-summary strong {
+    font-size: 22px;
+  }
+
+  .invoice-actions button {
+    flex: 1 1 42%;
+  }
+}
+
+@media (max-width: 360px) {
+  .quick-items {
+    grid-template-columns: 1fr;
+  }
+
+  .brand-mark {
+    width: 44px;
+    height: 44px;
+  }
+
+  .brand {
+    font-size: 18px;
+  }
+}
