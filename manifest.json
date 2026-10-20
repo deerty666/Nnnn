@@ -1,0 +1,20 @@
+{
+  "name": "ديرتي - فواتير السائقين",
+  "short_name": "ديرتي",
+  "description": "نظام فواتير السائقين وإدارة الحسابات لمطعم ديرتي",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#101112",
+  "theme_color": "#c39e6a",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
