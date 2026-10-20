@@ -5,8 +5,9 @@ const ASSETS_TO_CACHE = [
   './style.css',
   './app.js',
   './manifest.json',
-  './icon.svg'
+  './555.jpg'
 ];
+
 
 // 📦 تثبيت الخدمة وتخزين الملفات الثابتة مؤقتاً
 self.addEventListener('install', event => {
