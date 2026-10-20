@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>نظام فواتير السائقين | ديرتي</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+<div>
+<div class="brand">ديرتي | فواتير السائقين</div>
+<div class="sub">نظام محلي للكاشير — حفظ البيانات على هذا الكمبيوتر والمتصفح</div>
+</div>
+
+<div class="row" style="max-width:520px">
+<button class="secondary" onclick="exportData()">نسخة احتياطية</button>
+<button class="secondary" onclick="document.getElementById('importFile').click()">استعادة نسخة</button>
+<input id="importFile" type="file" accept="application/json" class="hidden" onchange="importData(event)">
+</div>
+</header>
+
+<main class="wrap">
+
+<div class="notice">
+تنبيه: البيانات محفوظة على هذا الكمبيوتر وفي المتصفح الحالي.
+خذ نسخة احتياطية بانتظام، ولا تمسح بيانات المتصفح قبل تصدير النسخة.
+</div>
+
+<div class="stats">
+
+<div class="stat">
+<span>السائقون</span>
+<strong id="driverCount">0</strong>
+</div>
+
+<div class="stat">
+<span>الفواتير المستقلة</span>
+<strong id="invoiceCount">0</strong>
+</div>
+
+<div class="stat">
+<span>إجمالي الحسابات المفتوحة</span>
+<strong id="openTotal">0 ر.س</strong>
+</div>
+
+<div class="stat">
+<span>إجمالي فواتير اليوم</span>
+<strong id="todayTotal">0 ر.س</strong>
+</div>
+
+</div>
+
+<div class="tabs">
+
+<button onclick="showTab('account')">
+الحساب المستمر للسائق
+</button>
+
+<button class="secondary" onclick="showTab('single')">
+فاتورة مستقلة
+</button>
+
+<button class="secondary" onclick="showTab('drivers')">
+إدارة السائقين
+</button>
+
+<button class="secondary" onclick="showTab('items')">
+الأصناف والأسعار
+</button>
+
+<button class="secondary" onclick="showTab('history')">
+سجل الفواتير
+</button>
+
+</div>
+
+<section id="tab-account" class="tab">
+
+<div class="layout">
+
+<div class="box">
+
+<h2>الحساب المستمر للسائق</h2>
+
+<label>
+اختر السائق
+<select id="accountDriver" onchange="renderAccount()"></select>
+</label>
+
+<div class="row">
+
+<button onclick="newDriverPrompt()">＋ إضافة سائق</button>
+
+<button class="secondary" onclick="printAccount()">
+🖨️ طباعة الحساب
+</button>
+
+<button class="danger" onclick="closeAccount()">
+إغلاق الحساب وبدء حساب جديد
+</button>
+
+</div>
+
+<div class="scroll" style="margin-top:14px">
+
+<table>
+<thead>
+<tr>
+<th>الصنف</th>
+<th>الكمية</th>
+<th>السعر</th>
+<th>الإجمالي</th>
+<th>إجراء</th>
+</tr>
+</thead>
+
+<tbody id="accountRows"></tbody>
+</table>
+
+</div>
+
+<div class="total">
+الإجمالي:
+<span id="accountTotal">0</span> ريال
+</div>
+
+<div class="row">
+
+<button class="green" onclick="saveAccount()">
+حفظ التغييرات
+</button>
+
+<button class="secondary" onclick="clearAccountConfirm()">
+تفريغ الحساب الحالي
+</button>
+
+</div>
+
+</div>
+
+<div class="box">
+
+<h2>إضافة أصناف للحساب</h2>
+
+<label>
+الصنف
+<select id="accountItem"></select>
+</label>
+
+<div class="formgrid">
+
+<label>
+الكمية
+<input id="accountQty" type="number" min="1" value="1">
+</label>
+
+<label>
+السعر (قابل للتعديل)
+<input id="accountPrice" type="number" min="0" step="0.25">
+</label>
+
+</div>
+
+<button style="width:100%" onclick="addToAccount()">
+＋ إضافة إلى الفاتورة المستمرة
+</button>
+
+<hr style="border-color:#353a41;margin:18px 0">
+
+<p class="muted">
+كل إضافة تُحفظ تلقائيًا على الحساب المفتوح للسائق المختار.
+يمكنك إضافة الصنف نفسه أكثر من مرة أو تعديل الكمية والسعر داخل الجدول.
+</p>
+
+</div>
+
+</div>
+
+</section>
+
+<section id="tab-single" class="tab hidden">
+
+<div class="layout">
+
+<div class="box">
+
+<h2>فاتورة مستقلة جديدة</h2>
+
+<div class="formgrid">
+
+<label>
+السائق
+<select id="singleDriver"></select>
+</label>
+
+<label>
+ملاحظة
+<input id="singleNote" placeholder="اختياري">
+</label>
+
+</div>
+
+<label>
+الصنف
+<select id="singleItem" onchange="setSinglePrice()"></select>
+</label>
+
+<div class="formgrid">
+
+<label>
+الكمية
+<input id="singleQty" type="number" min="1" value="1">
+</label>
+
+<label>
+السعر
+<input id="singlePrice" type="number" min="0" step="0.25">
+</label>
+
+</div>
+
+<button onclick="addSingleLine()">
+إضافة الصنف
+</button>
+
+<div class="scroll" style="margin-top:12px">
+
+<table>
+<thead>
+<tr>
+<th>الصنف</th>
+<th>الكمية</th>
+<th>السعر</th>
+<th>الإجمالي</th>
+<th></th>
+</tr>
+</thead>
+
+<tbody id="singleRows"></tbody>
+</table>
+
+</div>
+
+<div class="total">
+الإجمالي:
+<span id="singleTotal">0</span> ريال
+</div>
+
+<button class="green" onclick="saveSingleInvoice()">
+حفظ الفاتورة المستقلة
+</button>
+
+</div>
+
+<div class="box">
+
+<h2>ملاحظة</h2>
+
+<p class="muted">
+الفاتورة المستقلة منفصلة عن الحساب المستمر.
+بعد الحفظ تحصل على رقم فاتورة مستقل ويمكن فتحها من سجل الفواتير وإعادة طباعتها.
+</p>
+
+</div>
+
+</div>
+
+</section>
+
+<section id="tab-drivers" class="tab hidden">
+
+<div class="layout">
+
+<div class="box">
+
+<h2>إضافة سائق</h2>
+
+<label>
+اسم السائق
+<input id="driverName" placeholder="اسم السائق">
+</label>
+
+<label>
+رقم الجوال (اختياري)
+<input id="driverPhone" placeholder="05xxxxxxxx">
+</label>
+
+<button onclick="addDriver()">حفظ السائق</button>
+
+</div>
+
+<div class="box">
+
+<h2>قائمة السائقين</h2>
+
+<div class="scroll">
+
+<table>
+<thead>
+<tr>
+<th>الاسم</th>
+<th>الجوال</th>
+<th>الحساب المفتوح</th>
+<th>إجراء</th>
+</tr>
+</thead>
+
+<tbody id="driversRows"></tbody>
+</table>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+<section id="tab-items" class="tab hidden">
+
+<div class="layout">
+
+<div class="box">
+
+<h2>إضافة صنف</h2>
+
+<label>
+اسم الصنف
+<input id="itemName" placeholder="اسم الصنف">
+</label>
+
+<label>
+السعر بالريال
+<input id="itemPrice" type="number" min="0" step="0.25" placeholder="0">
+</label>
+
+<button onclick="addItem()">حفظ الصنف</button>
+
+</div>
+
+<div class="box">
+
+<h2>الأصناف والأسعار</h2>
+
+<div class="scroll">
+
+<table>
+<thead>
+<tr>
+<th>الصنف</th>
+<th>السعر</th>
+<th>إجراء</th>
+</tr>
+</thead>
+
+<tbody id="itemsRows"></tbody>
+</table>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+<section id="tab-history" class="tab hidden">
+
+<div class="box">
+
+<h2>سجل الفواتير</h2>
+
+<div class="row">
+
+<label>
+بحث باسم السائق أو رقم الفاتورة
+<input id="historySearch" oninput="renderHistory()" placeholder="اكتب للبحث...">
+</label>
+
+<label>
+نوع الفاتورة
+<select id="historyType" onchange="renderHistory()">
+<option value="all">الكل</option>
+<option value="single">فواتير مستقلة</option>
+<option value="closed">حسابات مستمرة مغلقة</option>
+</select>
+</label>
+
+</div>
+
+<div class="scroll">
+
+<table>
+<thead>
+<tr>
+<th>رقم</th>
+<th>النوع</th>
+<th>السائق</th>
+<th>التاريخ</th>
+<th>الإجمالي</th>
+<th>إجراء</th>
+</tr>
+</thead>
+
+<tbody id="historyRows"></tbody>
+</table>
+
+</div>
+
+</div>
+
+</section>
+
+<div id="printArea" class="hidden"></div>
+<div id="toast"></div>
+
+</main>
+
+<script src="app.js"></script>
+
+</body>
+</html>
