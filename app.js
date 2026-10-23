@@ -1505,7 +1505,7 @@ Object.assign(window, {
   installApp
 });
 
-init();
+
 /* ==========================================
    الفاتورة الختامية الموحدة للسائق
 ========================================== */
@@ -1958,3 +1958,4 @@ Object.assign(window, {
   printFinalInvoice,
   cancelFinalInvoice
 });
+init();
