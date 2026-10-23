@@ -1,0 +1,22 @@
+{
+  "id": "./",
+  "name": "ديرتي | نظام حسابات السائقين",
+  "short_name": "ديرتي",
+  "description": "نظام إدارة فواتير السائقين والحسابات اليومية",
+  "lang": "ar-SA",
+  "dir": "rtl",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#12110f",
+  "theme_color": "#171411",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
