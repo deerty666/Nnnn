@@ -1014,3 +1014,158 @@ td button {
     font-size: 9px !important;
   }
 }
+/* ==================================
+   تنسيق الفاتورة الختامية
+================================== */
+
+@media print {
+  #printArea .final-receipt {
+    width: 100% !important;
+    direction: rtl !important;
+    text-align: right !important;
+    font-family: Tahoma, Arial, sans-serif !important;
+    font-size: 11px !important;
+    line-height: 1.6 !important;
+    color: #000 !important;
+    background: #fff !important;
+  }
+
+  #printArea .f-header {
+    text-align: center !important;
+    padding-bottom: 5px !important;
+  }
+
+  #printArea .f-header h1 {
+    font-size: 25px !important;
+    font-weight: 900 !important;
+    margin: 0 0 3px !important;
+  }
+
+  #printArea .f-subtitle {
+    font-size: 12px !important;
+    font-weight: bold !important;
+  }
+
+  #printArea .f-title {
+    display: inline-block !important;
+    margin-top: 7px !important;
+    padding: 3px 12px !important;
+    border: 1px solid #000 !important;
+    border-radius: 4px !important;
+    font-weight: bold !important;
+    font-size: 13px !important;
+  }
+
+  #printArea .f-divider {
+    border-top: 1px dashed #555 !important;
+    margin: 9px 0 !important;
+  }
+
+  #printArea .f-info-row,
+  #printArea .f-total-row,
+  #printArea .f-payment-row,
+  #printArea .f-credit-row {
+    display: flex !important;
+    align-items: flex-start !important;
+    justify-content: space-between !important;
+    gap: 8px !important;
+    margin: 5px 0 !important;
+  }
+
+  #printArea .f-info-row span,
+  #printArea .f-total-row span,
+  #printArea .f-payment-row span,
+  #printArea .f-credit-row span {
+    flex: 1 !important;
+    min-width: 0 !important;
+  }
+
+  #printArea .f-info-row strong,
+  #printArea .f-total-row strong,
+  #printArea .f-payment-row strong,
+  #printArea .f-credit-row strong {
+    text-align: left !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  #printArea .f-table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    table-layout: fixed !important;
+    white-space: normal !important;
+    font-size: 10px !important;
+  }
+
+  #printArea .f-table th,
+  #printArea .f-table td {
+    padding: 6px 3px !important;
+    border-bottom: 1px solid #ccc !important;
+    vertical-align: top !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  #printArea .f-table th:first-child,
+  #printArea .f-table td:first-child {
+    width: 68% !important;
+    text-align: right !important;
+  }
+
+  #printArea .f-table th:last-child,
+  #printArea .f-table td:last-child {
+    width: 32% !important;
+    text-align: left !important;
+  }
+
+  #printArea .f-item strong {
+    display: block !important;
+    font-size: 11px !important;
+  }
+
+  #printArea .f-detail {
+    font-size: 9px !important;
+    margin-top: 2px !important;
+  }
+
+  #printArea .f-amount {
+    font-weight: bold !important;
+  }
+
+  #printArea .f-grand-total {
+    margin: 10px 0 !important;
+    padding: 9px 5px !important;
+    border: 2px solid #000 !important;
+    text-align: center !important;
+  }
+
+  #printArea .f-grand-total span {
+    display: block !important;
+    font-size: 12px !important;
+    font-weight: bold !important;
+  }
+
+  #printArea .f-grand-total strong {
+    display: block !important;
+    margin-top: 3px !important;
+    font-size: 21px !important;
+    font-weight: 900 !important;
+  }
+
+  #printArea .f-credit-row {
+    padding: 8px 5px !important;
+    border: 1px dashed #000 !important;
+    font-weight: 900 !important;
+    font-size: 12px !important;
+  }
+
+  #printArea .f-footer {
+    text-align: center !important;
+    padding: 5px 0 2px !important;
+    font-size: 10px !important;
+  }
+
+  #printArea .f-footer strong {
+    display: block !important;
+    font-size: 12px !important;
+  }
+}
