@@ -278,14 +278,21 @@ function driverBalance(driverId) {
   const opening = driverOpeningBalance(driverId);
 
   const credits = db.invoices
-    .filter(invoice => invoice.driverId === driverId)
+    .filter(invoice =>
+      invoice.driverId === driverId &&
+      !invoice.settledBy
+    )
     .reduce((sum, invoice) => sum + invoiceRemaining(invoice), 0);
+
+  const finalCredits = (db.finalInvoices || [])
+    .filter(invoice => invoice.driverId === driverId)
+    .reduce((sum, invoice) => sum + num(invoice.credit), 0);
 
   const repayments = db.repayments
     .filter(payment => payment.driverId === driverId)
     .reduce((sum, payment) => sum + num(payment.amount), 0);
 
-  return Math.max(0, opening + credits - repayments);
+  return Math.max(0, opening + credits + finalCredits - repayments);
 }
 
 function addDriver() {
@@ -1467,3 +1474,455 @@ Object.assign(window, {
 });
 
 init();
+/* ==========================================
+   الفاتورة الختامية الموحدة للسائق
+========================================== */
+
+let finalInvoiceDraft = null;
+
+function prepareFinalInvoice() {
+  const driverId = selectedDriverId();
+  const driver = getDriver(driverId);
+
+  if (!driver) {
+    notify("اختر السائق أولًا من شاشة الكاشير.");
+    showTab("account");
+    return;
+  }
+
+  const shift = getOpenShift(driverId);
+
+  if (!shift) {
+    notify("لا يوجد دوام مفتوح لهذا السائق.");
+    return;
+  }
+
+  const invoices = db.invoices.filter(invoice =>
+    invoice.driverId === driverId &&
+    invoice.shiftId === shift.id &&
+    !invoice.settledBy
+  );
+
+  if (!invoices.length) {
+    notify("لا توجد فواتير غير مسوّاة في الدوام الحالي.");
+    return;
+  }
+
+  // نجمع الأصناف المتشابهة ذات السعر نفسه.
+  // الأصناف ذات الأسعار المختلفة تبقى في سطرين منفصلين.
+  const merged = new Map();
+
+  invoices.forEach(invoice => {
+    (invoice.items || []).forEach(item => {
+      const key = String(item.itemId || item.name) + "|" + num(item.price);
+
+      if (!merged.has(key)) {
+        merged.set(key, {
+          id: uid("FINAL-LINE"),
+          itemId: item.itemId || null,
+          name: item.name,
+          qty: 0,
+          price: num(item.price)
+        });
+      }
+
+      merged.get(key).qty += num(item.qty);
+    });
+  });
+
+  finalInvoiceDraft = {
+    driverId,
+    shiftId: shift.id,
+    sourceInvoiceIds: invoices.map(invoice => invoice.id),
+    items: Array.from(merged.values()),
+    createdAt: dateTime()
+  };
+
+  setText("finalDriverName", "السائق: " + driver.name);
+
+  setValue("finalDiscount", "0");
+  setValue("finalCash", "0");
+  setValue("finalCard", "0");
+
+  renderFinalInvoiceRows();
+
+  document.getElementById("finalInvoicePanel")?.classList.remove("hidden");
+
+  updateFinalInvoiceTotals();
+
+  document.getElementById("finalInvoicePanel")?.scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+  });
+}
+
+function renderFinalInvoiceRows() {
+  const draft = finalInvoiceDraft;
+
+  if (!draft) return;
+
+  setHTML("finalInvoiceRows", draft.items.length
+    ? draft.items.map(item => `
+      <tr>
+        <td>${esc(item.name)}</td>
+        <td>
+          <input
+            type="number"
+            min="0.01"
+            step="0.01"
+            value="${num(item.qty)}"
+            onchange="changeFinalInvoiceLine('${item.id}','qty',this.value)">
+        </td>
+        <td>
+          <input
+            type="number"
+            min="0"
+            step="0.01"
+            value="${num(item.price)}"
+            onchange="changeFinalInvoiceLine('${item.id}','price',this.value)">
+        </td>
+        <td>${money(num(item.qty) * num(item.price))} ر.س</td>
+        <td>
+          <button class="danger" onclick="removeFinalInvoiceLine('${item.id}')">
+            حذف
+          </button>
+        </td>
+      </tr>
+    `).join("")
+    : `<tr><td colspan="5" class="empty-state">لا توجد أصناف في الفاتورة.</td></tr>`);
+}
+
+function changeFinalInvoiceLine(lineId, field, value) {
+  if (!finalInvoiceDraft) return;
+
+  const line = finalInvoiceDraft.items.find(item => item.id === lineId);
+  if (!line) return;
+
+  const amount = num(value);
+
+  if (String(value).trim() === "" || amount < 0 ||
+      (field === "qty" && amount <= 0)) {
+    notify("أدخل قيمة صحيحة.");
+    renderFinalInvoiceRows();
+    return;
+  }
+
+  line[field] = amount;
+
+  renderFinalInvoiceRows();
+  updateFinalInvoiceTotals();
+}
+
+function removeFinalInvoiceLine(lineId) {
+  if (!finalInvoiceDraft) return;
+
+  if (!ask("هل تريد حذف هذا الصنف من الفاتورة الختامية؟")) return;
+
+  finalInvoiceDraft.items = finalInvoiceDraft.items.filter(
+    item => item.id !== lineId
+  );
+
+  renderFinalInvoiceRows();
+  updateFinalInvoiceTotals();
+}
+
+function addFinalInvoiceItem() {
+  if (!finalInvoiceDraft) return;
+
+  if (!db.items.length) {
+    notify("أضف الأصناف أولًا من تبويب الأصناف والأسعار.");
+    return;
+  }
+
+  const choices = db.items.map((item, index) =>
+    (index + 1) + " - " + item.name + " (" + money(item.price) + " ريال)"
+  ).join("\n");
+
+  const choice = prompt("اختر رقم الصنف لإضافته:\n" + choices);
+
+  if (choice === null) return;
+
+  const index = parseInt(choice, 10) - 1;
+  const item = db.items[index];
+
+  if (!item) {
+    notify("رقم الصنف غير صحيح.");
+    return;
+  }
+
+  const qtyText = prompt("أدخل الكمية:", "1");
+
+  if (qtyText === null) return;
+
+  const qty = num(qtyText);
+
+  if (qty <= 0) {
+    notify("الكمية يجب أن تكون أكبر من صفر.");
+    return;
+  }
+
+  finalInvoiceDraft.items.push({
+    id: uid("FINAL-LINE"),
+    itemId: item.id,
+    name: item.name,
+    qty,
+    price: num(item.price)
+  });
+
+  renderFinalInvoiceRows();
+  updateFinalInvoiceTotals();
+}
+
+function finalInvoiceGross() {
+  if (!finalInvoiceDraft) return 0;
+
+  return finalInvoiceDraft.items.reduce(
+    (sum, item) => sum + num(item.qty) * num(item.price),
+    0
+  );
+}
+
+function finalInvoiceNet() {
+  const gross = finalInvoiceGross();
+  const discount = Math.max(0, num(valueOf("finalDiscount")));
+
+  return Math.max(0, gross - discount);
+}
+
+function updateFinalInvoiceTotals() {
+  const gross = finalInvoiceGross();
+  const discount = Math.max(0, num(valueOf("finalDiscount")));
+  const total = Math.max(0, gross - discount);
+  const cash = Math.max(0, num(valueOf("finalCash")));
+  const card = Math.max(0, num(valueOf("finalCard")));
+
+  setValue("finalTotal", money(total) + " ريال");
+
+  if (discount > gross) {
+    setText("finalCredit", "الخصم أكبر من الإجمالي");
+    return;
+  }
+
+  if (cash + card > total + 0.001) {
+    setText("finalCredit", "المبالغ تتجاوز الإجمالي");
+    return;
+  }
+
+  setText(
+    "finalCredit",
+    money(Math.max(0, total - cash - card)) + " ر.س"
+  );
+}
+
+function buildFinalInvoiceRecord() {
+  if (!finalInvoiceDraft) return null;
+
+  const items = finalInvoiceDraft.items.map(item => ({ ...item }));
+  const gross = items.reduce(
+    (sum, item) => sum + num(item.qty) * num(item.price),
+    0
+  );
+
+  const discount = Math.max(0, num(valueOf("finalDiscount")));
+  const total = Math.max(0, gross - discount);
+  const cash = Math.max(0, num(valueOf("finalCash")));
+  const card = Math.max(0, num(valueOf("finalCard")));
+
+  if (!items.length || total <= 0) {
+    notify("الفاتورة الختامية فارغة أو إجماليها صفر.");
+    return null;
+  }
+
+  if (discount > gross) {
+    notify("الخصم لا يمكن أن يتجاوز إجمالي الأصناف.");
+    return null;
+  }
+
+  if (cash + card > total + 0.001) {
+    notify("مجموع النقد والشبكة أكبر من إجمالي الفاتورة.");
+    return null;
+  }
+
+  return {
+    id: uid("FINAL"),
+    code: makeCode("FINAL"),
+    driverId: finalInvoiceDraft.driverId,
+    shiftId: finalInvoiceDraft.shiftId,
+    sourceInvoiceIds: [...finalInvoiceDraft.sourceInvoiceIds],
+    createdAt: dateTime(),
+    date: today(),
+    items,
+    gross,
+    discount,
+    total,
+    cashPaid: cash,
+    cardPaid: card,
+    credit: Math.max(0, total - cash - card),
+    type: "final",
+    note: "فاتورة ختامية موحدة"
+  };
+}
+
+function saveFinalInvoice() {
+  if (!finalInvoiceDraft) {
+    notify("جهّز الفاتورة الختامية أولًا.");
+    return;
+  }
+
+  const invoice = buildFinalInvoiceRecord();
+
+  if (!invoice) return;
+
+  const sourceInvoices = db.invoices.filter(item =>
+    finalInvoiceDraft.sourceInvoiceIds.includes(item.id)
+  );
+
+  if (sourceInvoices.length !== finalInvoiceDraft.sourceInvoiceIds.length) {
+    notify("تعذر العثور على جميع الفواتير الأصلية. لم يتم الاعتماد.");
+    return;
+  }
+
+  if (sourceInvoices.some(item => item.settledBy)) {
+    notify("بعض الفواتير تمت تسويتها مسبقًا. أعد فتح الشاشة بعد تحديث البيانات.");
+    return;
+  }
+
+  const confirmation =
+    "اعتماد الفاتورة الختامية رقم " + invoice.code + "؟\n\n" +
+    "الإجمالي قبل الخصم: " + money(invoice.gross) + " ريال\n" +
+    "الخصم: " + money(invoice.discount) + " ريال\n" +
+    "الإجمالي النهائي: " + money(invoice.total) + " ريال\n" +
+    "نقدًا: " + money(invoice.cashPaid) + " ريال\n" +
+    "الشبكة: " + money(invoice.cardPaid) + " ريال\n" +
+    "آجل: " + money(invoice.credit) + " ريال\n\n" +
+    "سيتم تعليم الفواتير الأصلية بأنها مسوّاة، ولن تُضاف الفاتورة الختامية إلى مبيعات الأصناف مرة ثانية.";
+
+  if (!ask(confirmation)) return;
+
+  if (!Array.isArray(db.finalInvoices)) db.finalInvoices = [];
+
+  db.finalInvoices.push(invoice);
+
+  sourceInvoices.forEach(original => {
+    original.settledBy = invoice.id;
+    original.settledAt = invoice.createdAt;
+  });
+
+  if (!saveDB()) {
+    // لا نترك حالة الواجهة توحي بأن الاعتماد نجح.
+    db.finalInvoices = db.finalInvoices.filter(item => item.id !== invoice.id);
+    sourceInvoices.forEach(original => {
+      delete original.settledBy;
+      delete original.settledAt;
+    });
+    return;
+  }
+
+  finalInvoiceDraft = null;
+
+  document.getElementById("finalInvoicePanel")?.classList.add("hidden");
+
+  renderAll();
+  printFinalInvoiceRecord(invoice);
+
+  notify("تم اعتماد الفاتورة الختامية.");
+}
+
+function printFinalInvoice() {
+  if (!finalInvoiceDraft) {
+    notify("جهّز الفاتورة الختامية أولًا.");
+    return;
+  }
+
+  const invoice = buildFinalInvoiceRecord();
+
+  if (invoice) printFinalInvoiceRecord(invoice);
+}
+
+function printFinalInvoiceRecord(invoice) {
+  const driver = getDriver(invoice.driverId);
+
+  const rows = invoice.items.map(item => `
+    <tr>
+      <td>
+        ${esc(item.name)}
+        <br>
+        <small>${money(item.qty)} × ${money(item.price)}</small>
+      </td>
+      <td>${money(num(item.qty) * num(item.price))}</td>
+    </tr>
+  `).join("");
+
+  setHTML("printArea", `
+    <div class="receipt-center">
+      <h1>ديرتي</h1>
+      <h3>للمأكولات السعودية</h3>
+      <h3>الفاتورة الختامية</h3>
+    </div>
+
+    <div class="receipt-divider"></div>
+
+    <p>رقم الفاتورة: ${esc(invoice.code)}</p>
+    <p>السائق: ${esc(driver?.name || "—")}</p>
+    <p>التاريخ: ${esc(new Date(invoice.createdAt).toLocaleString("ar-SA"))}</p>
+    <p>عدد الفواتير المجمعة: ${invoice.sourceInvoiceIds.length}</p>
+
+    <div class="receipt-divider"></div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>الصنف / الكمية / السعر</th>
+          <th>الإجمالي</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>
+
+    <div class="receipt-divider"></div>
+
+    <p>الإجمالي قبل الخصم: ${money(invoice.gross)} ريال</p>
+    <p>الخصم: ${money(invoice.discount)} ريال</p>
+    <p class="receipt-total">الإجمالي النهائي: ${money(invoice.total)} ريال</p>
+    <p>نقدًا: ${money(invoice.cashPaid)} ريال</p>
+    <p>الشبكة: ${money(invoice.cardPaid)} ريال</p>
+    <p>المتبقي آجلًا: ${money(invoice.credit)} ريال</p>
+
+    <div class="receipt-divider"></div>
+
+    <p class="receipt-center">شكرًا لكم</p>
+  `);
+
+  const printArea = document.getElementById("printArea");
+
+  printArea.classList.remove("hidden");
+
+  setTimeout(() => {
+    window.print();
+
+    setTimeout(() => {
+      printArea.classList.add("hidden");
+    }, 700);
+  }, 300);
+}
+
+function cancelFinalInvoice() {
+  finalInvoiceDraft = null;
+
+  document.getElementById("finalInvoicePanel")?.classList.add("hidden");
+
+  notify("تم إلغاء تجهيز الفاتورة الختامية دون تغيير الفواتير الأصلية.");
+}
+
+/* إتاحة وظائف الشاشة لأزرار HTML */
+Object.assign(window, {
+  prepareFinalInvoice,
+  renderFinalInvoiceRows,
+  changeFinalInvoiceLine,
+  removeFinalInvoiceLine,
+  addFinalInvoiceItem,
+  updateFinalInvoiceTotals,
+  saveFinalInvoice,
+  printFinalInvoice,
+  cancelFinalInvoice
+});
