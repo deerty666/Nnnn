@@ -1,0 +1,1132 @@
+index.html<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1, maximum-scale=1">
+
+    <meta name="theme-color" content="#171411">
+    <meta name="description" content="نظام ديرتي لإدارة فواتير السائقين والحسابات اليومية">
+
+    <title>ديرتي | نظام حسابات السائقين</title>
+
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="icon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="style.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap"
+          rel="stylesheet">
+</head>
+
+<body>
+
+<div class="app-container">
+
+    <!-- رأس النظام -->
+    <header class="app-header">
+
+        <div class="brand">
+            <div class="brand-logo">د</div>
+
+            <div class="brand-info">
+                <h1>ديرتي</h1>
+                <p>نظام حسابات السائقين</p>
+            </div>
+        </div>
+
+        <div class="header-actions">
+            <span class="system-status">
+                <span class="status-dot"></span>
+                النظام يعمل
+            </span>
+
+            <button type="button"
+                    class="btn btn-outline"
+                    id="installBtn"
+                    hidden>
+                تثبيت التطبيق
+            </button>
+        </div>
+
+    </header>
+
+
+    <!-- معلومات اليوم -->
+    <section class="today-bar">
+
+        <div>
+            <span class="muted-text">التاريخ</span>
+            <strong id="todayDate">—</strong>
+        </div>
+
+        <div>
+            <span class="muted-text">اليوم</span>
+            <strong id="todayName">—</strong>
+        </div>
+
+        <div>
+            <span class="muted-text">حالة الحسابات</span>
+            <strong class="today-status">حسابات اليوم</strong>
+        </div>
+
+    </section>
+
+
+    <!-- ملخص الحسابات -->
+    <section class="stats-grid">
+
+        <article class="stat-card">
+            <div class="stat-icon">🧾</div>
+            <div>
+                <span>عدد الفواتير</span>
+                <strong id="invoiceCount">0</strong>
+            </div>
+        </article>
+
+        <article class="stat-card">
+            <div class="stat-icon">💰</div>
+            <div>
+                <span>إجمالي المبيعات</span>
+                <strong id="openTotal">0.00 ر.س</strong>
+            </div>
+        </article>
+
+        <article class="stat-card">
+            <div class="stat-icon">💵</div>
+            <div>
+                <span>المقبوض نقدًا</span>
+                <strong id="cashTotal">0.00 ر.س</strong>
+            </div>
+        </article>
+
+        <article class="stat-card">
+            <div class="stat-icon">💳</div>
+            <div>
+                <span>مقبوض الشبكة</span>
+                <strong id="cardTotal">0.00 ر.س</strong>
+            </div>
+        </article>
+
+        <article class="stat-card">
+            <div class="stat-icon">📌</div>
+            <div>
+                <span>المتبقي</span>
+                <strong id="remainingTotal">0.00 ر.س</strong>
+            </div>
+        </article>
+
+    </section>
+
+
+    <!-- القائمة الرئيسية -->
+    <nav class="main-nav" aria-label="القائمة الرئيسية">
+
+        <button type="button"
+                class="nav-btn active"
+                data-tab="account"
+                onclick="showTab('account')">
+            <span>🧾</span>
+            حساب السائق
+        </button>
+
+        <button type="button"
+                class="nav-btn"
+                data-tab="single"
+                onclick="showTab('single')">
+            <span>➕</span>
+            فاتورة جديدة
+        </button>
+
+        <button type="button"
+                class="nav-btn"
+                data-tab="drivers"
+                onclick="showTab('drivers')">
+            <span>🚗</span>
+            السائقون
+        </button>
+
+        <button type="button"
+                class="nav-btn"
+                data-tab="items"
+                onclick="showTab('items')">
+            <span>🍽️</span>
+            المنتجات
+        </button>
+
+        <button type="button"
+                class="nav-btn"
+                data-tab="history"
+                onclick="showTab('history')">
+            <span>📋</span>
+            فواتير اليوم
+        </button>
+
+        <button type="button"
+                class="nav-btn"
+                data-tab="daily"
+                onclick="showTab('daily')">
+            <span>📊</span>
+            التقرير اليومي
+        </button>
+
+    </nav>
+
+
+    <main class="main-content">
+
+        <!-- ====================================== -->
+        <!-- القسم الأول: حساب السائق -->
+        <!-- ====================================== -->
+
+        <section class="tab-panel active" id="tab-account">
+
+            <div class="section-heading">
+                <div>
+                    <h2>حساب السائق</h2>
+                    <p>إضافة المنتجات وتسجيل حساب السائق لهذا اليوم.</p>
+                </div>
+            </div>
+
+            <div class="panel">
+
+                <div class="form-grid">
+
+                    <div class="form-group">
+                        <label for="accountDriver">اختر السائق</label>
+
+                        <select id="accountDriver">
+                            <option value="">اختر السائق</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="accountNote">ملاحظات الفاتورة</label>
+
+                        <input type="text"
+                               id="accountNote"
+                               placeholder="ملاحظات اختيارية">
+                    </div>
+
+                </div>
+
+                <div class="divider"></div>
+
+                <div class="section-subheading">
+                    <h3>إضافة المنتجات</h3>
+                    <span class="muted-text">اختر المنتج لإضافته للحساب</span>
+                </div>
+
+                <div class="form-group">
+                    <label for="productSearch">بحث عن منتج</label>
+
+                    <input type="search"
+                           id="productSearch"
+                           placeholder="اكتب اسم المنتج..."
+                           oninput="renderQuickItems()">
+                </div>
+
+                <div id="quickItems" class="quick-items">
+                    <div class="empty-state">
+                        أضف المنتجات أولًا من قسم إدارة المنتجات.
+                    </div>
+                </div>
+
+                <div class="divider"></div>
+
+                <div class="section-subheading">
+                    <h3>تفاصيل الحساب</h3>
+                    <span class="muted-text">يمكن تعديل الكمية والسعر</span>
+                </div>
+
+                <div class="table-wrapper">
+
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>المنتج</th>
+                                <th>الكمية</th>
+                                <th>السعر</th>
+                                <th>الإجمالي</th>
+                                <th>حذف</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="accountRows">
+                            <tr>
+                                <td colspan="5" class="empty-cell">
+                                    لم تتم إضافة منتجات بعد.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </div>
+
+                <div class="total-box">
+                    <span>إجمالي الفاتورة</span>
+                    <strong id="accountTotal">0.00 ر.س</strong>
+                </div>
+
+                <div class="divider"></div>
+
+                <div class="section-subheading">
+                    <h3>طريقة الدفع</h3>
+                    <span class="muted-text">يمكن الجمع بين النقد والشبكة</span>
+                </div>
+
+                <div class="form-grid">
+
+                    <div class="form-group">
+                        <label for="paymentCash">المبلغ النقدي</label>
+
+                        <input type="number"
+                               id="paymentCash"
+                               min="0"
+                               step="0.01"
+                               value="0"
+                               oninput="updateAccountPayment()">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="paymentCard">مبلغ الشبكة</label>
+
+                        <input type="number"
+                               id="paymentCard"
+                               min="0"
+                               step="0.01"
+                               value="0"
+                               oninput="updateAccountPayment()">
+                    </div>
+
+                </div>
+
+                <div class="payment-summary">
+
+                    <div>
+                        <span>إجمالي المدفوع</span>
+                        <strong id="paymentPaid">0.00 ر.س</strong>
+                    </div>
+
+                    <div>
+                        <span>المتبقي</span>
+                        <strong id="paymentRemaining">0.00 ر.س</strong>
+                    </div>
+
+                </div>
+
+                <div class="button-row">
+
+                    <button type="button"
+                            class="btn btn-secondary"
+                            onclick="clearAccountConfirm()">
+                        مسح الحساب الحالي
+                    </button>
+
+                    <button type="button"
+                            class="btn btn-outline"
+                            onclick="prepareFinalInvoice()">
+                        تجهيز الفاتورة النهائية
+                    </button>
+
+                    <button type="button"
+                            class="btn btn-primary"
+                            onclick="closeAccount()">
+                        حفظ الفاتورة
+                    </button>
+
+                </div>
+
+                <p class="help-text">
+                    حفظ الفاتورة يسجلها ضمن حسابات اليوم فقط.
+                    لن يتم ترحيل المتبقي إلى اليوم التالي.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- ====================================== -->
+        <!-- القسم الثاني: فاتورة جديدة -->
+        <!-- ====================================== -->
+
+        <section class="tab-panel" id="tab-single">
+
+            <div class="section-heading">
+                <div>
+                    <h2>فاتورة جديدة</h2>
+                    <p>إنشاء فاتورة مستقلة لسائق.</p>
+                </div>
+            </div>
+
+            <div class="panel">
+
+                <div class="form-grid">
+
+                    <div class="form-group">
+                        <label for="singleDriver">السائق</label>
+
+                        <select id="singleDriver">
+                            <option value="">اختر السائق</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="singleNote">ملاحظات</label>
+
+                        <input type="text"
+                               id="singleNote"
+                               placeholder="ملاحظات اختيارية">
+                    </div>
+
+                </div>
+
+                <div class="divider"></div>
+
+                <h3>إضافة منتج للفاتورة</h3>
+
+                <div class="form-grid">
+
+                    <div class="form-group">
+                        <label for="singleItem">المنتج</label>
+
+                        <select id="singleItem" onchange="setSinglePrice()">
+                            <option value="">اختر المنتج</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="singleQty">الكمية</label>
+
+                        <input type="number"
+                               id="singleQty"
+                               min="1"
+                               step="1"
+                               value="1">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="singlePrice">سعر الوحدة</label>
+
+                        <input type="number"
+                               id="singlePrice"
+                               min="0"
+                               step="0.01"
+                               value="0">
+                    </div>
+
+                </div>
+
+                <div class="button-row">
+                    <button type="button"
+                            class="btn btn-primary"
+                            onclick="addSingleLine()">
+                        إضافة المنتج
+                    </button>
+                </div>
+
+                <div class="divider"></div>
+
+                <h3>منتجات الفاتورة</h3>
+
+                <div class="table-wrapper">
+                    <table class="data-table">
+
+                        <thead>
+                            <tr>
+                                <th>المنتج</th>
+                                <th>الكمية</th>
+                                <th>السعر</th>
+                                <th>الإجمالي</th>
+                                <th>حذف</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="singleRows">
+                            <tr>
+                                <td colspan="5" class="empty-cell">
+                                    الفاتورة فارغة.
+                                </td>
+                            </tr>
+                        </tbody>
+
+                    </table>
+                </div>
+
+                <div class="total-box">
+                    <span>الإجمالي</span>
+                    <strong id="singleTotal">0.00 ر.س</strong>
+                </div>
+
+                <div class="divider"></div>
+
+                <h3>الدفع</h3>
+
+                <div class="form-grid">
+
+                    <div class="form-group">
+                        <label for="singleCash">نقدًا</label>
+
+                        <input type="number"
+                               id="singleCash"
+                               min="0"
+                               step="0.01"
+                               value="0"
+                               oninput="updateSinglePayment()">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="singleCard">الشبكة</label>
+
+                        <input type="number"
+                               id="singleCard"
+                               min="0"
+                               step="0.01"
+                               value="0"
+                               oninput="updateSinglePayment()">
+                    </div>
+
+                    <div class="form-group">
+                        <label>المتبقي</label>
+                        <div class="readonly-field" id="singleRemaining">
+                            0.00 ر.س
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="button-row">
+
+                    <button type="button"
+                            class="btn btn-secondary"
+                            onclick="clearSingleInvoice()">
+                        تفريغ الفاتورة
+                    </button>
+
+                    <button type="button"
+                            class="btn btn-primary"
+                            onclick="saveSingleInvoice()">
+                        حفظ الفاتورة
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ====================================== -->
+        <!-- القسم الثالث: إدارة السائقين -->
+        <!-- ====================================== -->
+
+        <section class="tab-panel" id="tab-drivers">
+
+            <div class="section-heading">
+                <div>
+                    <h2>إدارة السائقين</h2>
+                    <p>إضافة السائقين وتعديل بياناتهم.</p>
+                </div>
+            </div>
+
+            <div class="panel">
+
+                <h3 id="driverFormTitle">إضافة سائق جديد</h3>
+
+                <form id="driverForm" onsubmit="addDriver(event)">
+
+                    <input type="hidden" id="driverEditId" value="">
+
+                    <div class="form-grid">
+
+                        <div class="form-group">
+                            <label for="driverName">اسم السائق</label>
+
+                            <input type="text"
+                                   id="driverName"
+                                   required
+                                   maxlength="100"
+                                   placeholder="اسم السائق">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="driverPhone">رقم الجوال</label>
+
+                            <input type="tel"
+                                   id="driverPhone"
+                                   maxlength="20"
+                                   placeholder="05xxxxxxxx">
+                        </div>
+
+                    </div>
+
+                    <div class="button-row">
+
+                        <button type="submit"
+                                class="btn btn-primary"
+                                id="driverSubmitBtn">
+                            حفظ السائق
+                        </button>
+
+                        <button type="button"
+                                class="btn btn-secondary"
+                                onclick="resetDriverForm()">
+                            إلغاء
+                        </button>
+
+                    </div>
+
+                </form>
+
+                <div class="divider"></div>
+
+                <div class="section-subheading">
+                    <h3>قائمة السائقين</h3>
+                    <span id="driverCount">0 سائق</span>
+                </div>
+
+                <div class="table-wrapper">
+
+                    <table class="data-table">
+
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>اسم السائق</th>
+                                <th>رقم الجوال</th>
+                                <th>حساب اليوم</th>
+                                <th>إجراءات</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="driversRows">
+                            <tr>
+                                <td colspan="5" class="empty-cell">
+                                    لا يوجد سائقون.
+                                </td>
+                            </tr>
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ====================================== -->
+        <!-- القسم الرابع: إدارة المنتجات -->
+        <!-- ====================================== -->
+
+        <section class="tab-panel" id="tab-items">
+
+            <div class="section-heading">
+                <div>
+                    <h2>إدارة المنتجات</h2>
+                    <p>أضف المنتجات والأسعار أو عدّلها وقت الحاجة.</p>
+                </div>
+            </div>
+
+            <div class="panel">
+
+                <h3 id="itemFormTitle">إضافة منتج جديد</h3>
+
+                <form id="itemForm" onsubmit="addItem(event)">
+
+                    <input type="hidden" id="itemEditId" value="">
+
+                    <div class="form-grid">
+
+                        <div class="form-group">
+                            <label for="itemName">اسم المنتج</label>
+
+                            <input type="text"
+                                   id="itemName"
+                                   required
+                                   maxlength="100"
+                                   placeholder="اسم المنتج">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="itemPrice">السعر بالريال</label>
+
+                            <input type="number"
+                                   id="itemPrice"
+                                   required
+                                   min="0"
+                                   step="0.01"
+                                   placeholder="0.00">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="itemCategory">التصنيف</label>
+
+                            <input type="text"
+                                   id="itemCategory"
+                                   maxlength="60"
+                                   placeholder="مثال: وجبات، مشروبات">
+                        </div>
+
+                    </div>
+
+                    <div class="button-row">
+
+                        <button type="submit"
+                                class="btn btn-primary"
+                                id="itemSubmitBtn">
+                            حفظ المنتج
+                        </button>
+
+                        <button type="button"
+                                class="btn btn-secondary"
+                                onclick="resetItemForm()">
+                            إلغاء
+                        </button>
+
+                    </div>
+
+                </form>
+
+                <div class="divider"></div>
+
+                <div class="form-group">
+                    <label for="itemSearch">البحث في المنتجات</label>
+
+                    <input type="search"
+                           id="itemSearch"
+                           placeholder="ابحث باسم المنتج..."
+                           oninput="renderItems()">
+                </div>
+
+                <div class="table-wrapper">
+
+                    <table class="data-table">
+
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>اسم المنتج</th>
+                                <th>التصنيف</th>
+                                <th>السعر</th>
+                                <th>إجراءات</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="itemsRows">
+                            <tr>
+                                <td colspan="5" class="empty-cell">
+                                    لا توجد منتجات.
+                                </td>
+                            </tr>
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ====================================== -->
+        <!-- القسم الخامس: فواتير اليوم -->
+        <!-- ====================================== -->
+
+        <section class="tab-panel" id="tab-history">
+
+            <div class="section-heading">
+                <div>
+                    <h2>فواتير اليوم</h2>
+                    <p>عرض الفواتير المسجلة خلال اليوم الحالي فقط.</p>
+                </div>
+            </div>
+
+            <div class="panel">
+
+                <div class="form-grid">
+
+                    <div class="form-group">
+                        <label for="historySearch">بحث</label>
+
+                        <input type="search"
+                               id="historySearch"
+                               placeholder="رقم الفاتورة أو اسم السائق..."
+                               oninput="renderHistory()">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="historyType">نوع الفاتورة</label>
+
+                        <select id="historyType" onchange="renderHistory()">
+                            <option value="all">جميع الفواتير</option>
+                            <option value="single">الفواتير العادية</option>
+                            <option value="final">الفواتير النهائية</option>
+                        </select>
+                    </div>
+
+                </div>
+
+                <div class="table-wrapper">
+
+                    <table class="data-table">
+
+                        <thead>
+                            <tr>
+                                <th>رقم الفاتورة</th>
+                                <th>الوقت</th>
+                                <th>السائق</th>
+                                <th>الإجمالي</th>
+                                <th>نقدًا</th>
+                                <th>الشبكة</th>
+                                <th>المتبقي</th>
+                                <th>الإجراءات</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="historyRows">
+                            <tr>
+                                <td colspan="8" class="empty-cell">
+                                    لا توجد فواتير مسجلة اليوم.
+                                </td>
+                            </tr>
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ====================================== -->
+        <!-- القسم السادس: التقرير اليومي -->
+        <!-- ====================================== -->
+
+        <section class="tab-panel" id="tab-daily">
+
+            <div class="section-heading">
+                <div>
+                    <h2>التقرير اليومي</h2>
+                    <p>ملخص مبيعات وتحصيلات اليوم الحالي.</p>
+                </div>
+            </div>
+
+            <div class="panel">
+
+                <div class="report-header">
+
+                    <div>
+                        <h3>ملخص الحسابات</h3>
+                        <p class="muted-text">
+                            يعرض هذا التقرير حسابات اليوم فقط.
+                        </p>
+                    </div>
+
+                    <div class="report-date">
+                        <span>تاريخ التقرير</span>
+                        <strong id="reportDate">—</strong>
+                    </div>
+
+                </div>
+
+                <div class="divider"></div>
+
+                <div class="report-grid">
+
+                    <div class="report-card">
+                        <span>إجمالي المبيعات</span>
+                        <strong id="dailyTotal">0.00 ر.س</strong>
+                    </div>
+
+                    <div class="report-card">
+                        <span>إجمالي النقد</span>
+                        <strong id="dailyCash">0.00 ر.س</strong>
+                    </div>
+
+                    <div class="report-card">
+                        <span>إجمالي الشبكة</span>
+                        <strong id="dailyCard">0.00 ر.س</strong>
+                    </div>
+
+                    <div class="report-card">
+                        <span>إجمالي المتبقي</span>
+                        <strong id="dailyCredit">0.00 ر.س</strong>
+                    </div>
+
+                    <div class="report-card">
+                        <span>عدد الفواتير</span>
+                        <strong id="dailyInvoiceCount">0</strong>
+                    </div>
+
+                </div>
+
+                <div class="divider"></div>
+
+                <h3>تفاصيل حسابات السائقين</h3>
+
+                <div class="table-wrapper">
+
+                    <table class="data-table">
+
+                        <thead>
+                            <tr>
+                                <th>السائق</th>
+                                <th>عدد الفواتير</th>
+                                <th>إجمالي الحساب</th>
+                                <th>نقدًا</th>
+                                <th>الشبكة</th>
+                                <th>المتبقي</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="dayRows">
+                            <tr>
+                                <td colspan="6" class="empty-cell">
+                                    لا توجد بيانات لهذا اليوم.
+                                </td>
+                            </tr>
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+                <div class="button-row">
+
+                    <button type="button"
+                            class="btn btn-outline"
+                            onclick="printDailyReport()">
+                        طباعة التقرير
+                    </button>
+
+                    <button type="button"
+                            class="btn btn-danger"
+                            onclick="clearAllAccountsConfirm()">
+                        تصفير جميع الحسابات
+                    </button>
+
+                </div>
+
+                <div class="warning-box">
+                    <strong>تنبيه مهم:</strong>
+                    تصفير الحسابات يحذف جميع فواتير اليوم وحساباته
+                    ومدفوعاته نهائيًا من بيانات النظام.
+                    ستبقى أسماء السائقين والمنتجات وأسعارها محفوظة.
+                    لا يمكن استرجاع الفواتير بعد التصفير إلا إذا كانت
+                    لديك نسخة احتياطية محفوظة مسبقًا.
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ====================================== -->
+        <!-- نافذة الفاتورة النهائية -->
+        <!-- ====================================== -->
+
+        <section class="final-invoice-panel"
+                 id="finalInvoicePanel"
+                 hidden>
+
+            <div class="section-heading">
+                <div>
+                    <h2>الفاتورة النهائية للسائق</h2>
+                    <p>تجميع فواتير السائق المسجلة خلال اليوم.</p>
+                </div>
+            </div>
+
+            <div class="panel">
+
+                <div class="final-driver-box">
+                    <span>السائق</span>
+                    <strong id="finalDriverName">—</strong>
+                </div>
+
+                <div class="divider"></div>
+
+                <h3>تفاصيل الفاتورة المجمعة</h3>
+
+                <div class="table-wrapper">
+
+                    <table class="data-table">
+
+                        <thead>
+                            <tr>
+                                <th>المنتج</th>
+                                <th>الكمية</th>
+                                <th>السعر</th>
+                                <th>الإجمالي</th>
+                                <th>حذف</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="finalInvoiceRows">
+                            <tr>
+                                <td colspan="5" class="empty-cell">
+                                    لا توجد منتجات.
+                                </td>
+                            </tr>
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+                <div class="form-grid">
+
+                    <div class="form-group">
+                        <label for="finalDiscount">الخصم بالريال</label>
+
+                        <input type="number"
+                               id="finalDiscount"
+                               min="0"
+                               step="0.01"
+                               value="0"
+                               oninput="updateFinalInvoiceTotals()">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="finalCash">إجمالي النقد المستلم</label>
+
+                        <input type="number"
+                               id="finalCash"
+                               min="0"
+                               step="0.01"
+                               value="0"
+                               oninput="updateFinalInvoiceTotals()">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="finalCard">إجمالي الشبكة المستلمة</label>
+
+                        <input type="number"
+                               id="finalCard"
+                               min="0"
+                               step="0.01"
+                               value="0"
+                               oninput="updateFinalInvoiceTotals()">
+                    </div>
+
+                </div>
+
+                <div class="payment-summary">
+
+                    <div>
+                        <span>الإجمالي بعد الخصم</span>
+                        <strong id="finalTotal">0.00 ر.س</strong>
+                    </div>
+
+                    <div>
+                        <span>المتبقي</span>
+                        <strong id="finalCredit">0.00 ر.س</strong>
+                    </div>
+
+                </div>
+
+                <div class="form-group">
+                    <label for="finalNote">ملاحظات الفاتورة النهائية</label>
+
+                    <input type="text"
+                           id="finalNote"
+                           placeholder="ملاحظات اختيارية">
+                </div>
+
+                <p class="help-text">
+                    المبالغ النقدية والشبكة هنا تمثل إجمالي المبالغ
+                    المسجلة على الفاتورة النهائية، وليست مبالغ إضافية
+                    فوق الفواتير المجمعة.
+                </p>
+
+                <div class="button-row">
+
+                    <button type="button"
+                            class="btn btn-secondary"
+                            onclick="cancelFinalInvoice()">
+                        إلغاء
+                    </button>
+
+                    <button type="button"
+                            class="btn btn-primary"
+                            onclick="saveFinalInvoice()">
+                        حفظ الفاتورة النهائية
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- تذييل النظام -->
+    <footer class="app-footer">
+        <p>ديرتي © <span id="footerYear"></span></p>
+        <p>نظام حسابات السائقين اليومية</p>
+    </footer>
+
+</div>
+
+
+<!-- منطقة طباعة الفواتير والتقارير -->
+<div id="printArea" aria-hidden="true"></div>
+
+
+<!-- رسائل النظام -->
+<div id="toast"
+     class="toast"
+     role="status"
+     aria-live="polite"></div>
+
+
+<!-- تأكيد العمليات -->
+<div id="confirmModal"
+     class="modal"
+     hidden>
+
+    <div class="modal-content">
+
+        <div class="modal-icon">⚠️</div>
+
+        <h3 id="confirmTitle">تأكيد العملية</h3>
+
+        <p id="confirmMessage">
+            هل أنت متأكد من تنفيذ هذه العملية؟
+        </p>
+
+        <div class="button-row">
+
+            <button type="button"
+                    class="btn btn-secondary"
+                    onclick="closeConfirmModal()">
+                إلغاء
+            </button>
+
+            <button type="button"
+                    class="btn btn-danger"
+                    id="confirmActionBtn">
+                تأكيد
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- ملف وظائف النظام -->
+<script src="app.js"></script>
+
+</body>
+</html>
