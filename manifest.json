@@ -1,0 +1,27 @@
+{
+  "id": "./",
+  "name": "ديرتي | نظام فواتير السائقين",
+  "short_name": "ديرتي فواتير",
+  "description": "نظام فواتير السائقين وإدارة النقد والشبكة والآجل والسداد وإقفال الدوام",
+  "lang": "ar-SA",
+  "dir": "rtl",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#100e0b",
+  "theme_color": "#d4af37",
+  "categories": [
+    "business",
+    "productivity",
+    "finance"
+  ],
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
