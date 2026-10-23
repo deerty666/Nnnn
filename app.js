@@ -146,6 +146,9 @@ function normaliseDB(raw) {
   data.accounts = data.accounts && typeof data.accounts === "object"
     ? data.accounts : {};
   data.invoices = Array.isArray(data.invoices) ? data.invoices : [];
+   data.finalInvoices = Array.isArray(data.finalInvoices)
+  ? data.finalInvoices
+  : [];
   data.shifts = Array.isArray(data.shifts) ? data.shifts : [];
   data.repayments = Array.isArray(data.repayments) ? data.repayments : [];
   data.openingBalances = data.openingBalances &&
