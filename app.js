@@ -1958,4 +1958,3 @@ Object.assign(window, {
   printFinalInvoice,
   cancelFinalInvoice
 });
-init();
