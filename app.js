@@ -1125,15 +1125,27 @@ function printInvoice(invoiceId) {
 }
 
 function printReceipt(invoice) {
-  const lines = Array.isArray(invoice.items) ? invoice.items : [];
+  const printArea = document.getElementById("printArea");
 
-  const rows = lines.map(item => `
+  if (!printArea || !invoice) {
+    alert("تعذر تجهيز الفاتورة للطباعة.");
+    return;
+  }
+
+  const items = Array.isArray(invoice.items) ? invoice.items : [];
+
+  const rows = items.map(item => `
     <tr>
-      <td>${esc(item.name)}<br><small>${money(item.qty)} × ${money(item.price)}</small></td>
+      <td>
+        ${esc(item.name)}
+        <br>
+        <small>${money(item.qty)} × ${money(item.price)}</small>
+      </td>
       <td>${money(num(item.qty) * num(item.price))}</td>
-    </tr>`).join("");
+    </tr>
+  `).join("");
 
-  setHTML("printArea", `
+  printArea.innerHTML = `
     <div class="receipt-center">
       <h1>ديرتي</h1>
       <h3>للمأكولات السعودية</h3>
@@ -1142,34 +1154,59 @@ function printReceipt(invoice) {
 
     <div class="receipt-divider"></div>
 
-    <p>رقم الفاتورة: ${esc(invoice.code || "معاينة")}</p>
+    <p>رقم الفاتورة: ${esc(invoice.code || "—")}</p>
     <p>السائق: ${esc(driverName(invoice.driverId))}</p>
-    <p>التاريخ: ${esc(invoice.createdAt ? new Date(invoice.createdAt).toLocaleString("ar-SA") : nowText())}</p>
+    <p>التاريخ: ${esc(
+      invoice.createdAt
+        ? new Date(invoice.createdAt).toLocaleString("ar-SA")
+        : nowText()
+    )}</p>
 
     <div class="receipt-divider"></div>
 
     <table>
-      <thead><tr><th>الصنف</th><th>الإجمالي</th></tr></thead>
-      <tbody>${rows}</tbody>
+      <thead>
+        <tr>
+          <th>الصنف</th>
+          <th>الإجمالي</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rows}
+      </tbody>
     </table>
 
     <div class="receipt-divider"></div>
 
-    <p class="receipt-total">الإجمالي: ${money(invoice.total)} ريال</p>
-    <p>النقد: ${money(invoice.cashPaid)} ريال</p>
+    <p class="receipt-total">
+      إجمالي الفاتورة: ${money(invoice.total)} ريال
+    </p>
+
+    <p>نقدًا: ${money(invoice.cashPaid)} ريال</p>
     <p>الشبكة: ${money(invoice.cardPaid)} ريال</p>
-    <p>الآجل: ${money(invoiceRemaining(invoice))} ريال</p>
-    ${invoice.note ? `<p>ملاحظة: ${esc(invoice.note)}</p>` : ""}
+    <p>المتبقي آجلًا: ${money(invoiceRemaining(invoice))} ريال</p>
+
+    ${invoice.note
+      ? `<p>ملاحظة: ${esc(invoice.note)}</p>`
+      : ""}
 
     <div class="receipt-divider"></div>
 
     <p class="receipt-center">شكرًا لزيارتكم مطعم ديرتي</p>
-    <p class="receipt-center receipt-small">نظام فواتير السائقين</p>
-  `);
+  `;
 
-  window.print();
+  // تأكد من إظهار منطقة الفاتورة قبل الطباعة
+  printArea.classList.remove("hidden");
+
+  setTimeout(() => {
+    window.print();
+
+    // إخفاء الفاتورة بعد انتهاء نافذة الطباعة
+    setTimeout(() => {
+      printArea.classList.add("hidden");
+    }, 500);
+  }, 300);
 }
-
 /* ---------- الإحصائيات والعرض ---------- */
 
 function renderStats() {
