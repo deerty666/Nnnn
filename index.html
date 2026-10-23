@@ -616,11 +616,86 @@
         سيظهر ملخص فواتير الدوام والمبالغ المحصلة والآجلة.
       </p>
 
-      <div class="shift-actions">
-        <button class="close-btn" onclick="closeShift()">
-          🔒 إقفال دوام السائق المحدد
-        </button>
-      </div>
+<div class="shift-actions">
+  <button class="print-btn" onclick="prepareFinalInvoice()">
+    🧾 تجهيز الفاتورة الختامية الموحّدة
+  </button>
+
+  <button class="close-btn" onclick="closeShift()">
+    🔒 إقفال دوام السائق
+  </button>
+</div>
+
+<div id="finalInvoicePanel" class="box hidden" style="margin-top:20px">
+
+  <h2>الفاتورة الختامية الموحّدة</h2>
+
+  <p id="finalDriverName" class="muted"></p>
+
+  <div class="scroll">
+    <table>
+      <thead>
+        <tr>
+          <th>الصنف</th>
+          <th>الكمية</th>
+          <th>سعر الوحدة</th>
+          <th>الإجمالي</th>
+          <th>إجراء</th>
+        </tr>
+      </thead>
+      <tbody id="finalInvoiceRows"></tbody>
+    </table>
+  </div>
+
+  <button class="secondary" onclick="addFinalInvoiceItem()">
+    ＋ إضافة صنف
+  </button>
+
+  <div class="formgrid" style="margin-top:15px">
+    <label>
+      الخصم بالريال
+      <input id="finalDiscount" type="number" min="0" step="0.01" value="0"
+        oninput="updateFinalInvoiceTotals()">
+    </label>
+
+    <label>
+      إجمالي الفاتورة بعد الخصم
+      <input id="finalTotal" readonly>
+    </label>
+
+    <label>
+      المدفوع نقدًا
+      <input id="finalCash" type="number" min="0" step="0.01" value="0"
+        oninput="updateFinalInvoiceTotals()">
+    </label>
+
+    <label>
+      المدفوع بالشبكة
+      <input id="finalCard" type="number" min="0" step="0.01" value="0"
+        oninput="updateFinalInvoiceTotals()">
+    </label>
+  </div>
+
+  <div class="payment-result">
+    <span>المتبقي آجلًا</span>
+    <strong id="finalCredit">0.00 ر.س</strong>
+  </div>
+
+  <div class="invoice-actions">
+    <button class="green" onclick="saveFinalInvoice()">
+      💾 اعتماد الفاتورة الختامية
+    </button>
+
+    <button class="print-btn" onclick="printFinalInvoice()">
+      🖨️ طباعة الفاتورة الختامية
+    </button>
+
+    <button class="secondary" onclick="cancelFinalInvoice()">
+      إلغاء
+    </button>
+  </div>
+
+</div>
 
       <div class="scroll" style="margin-top:18px">
 
