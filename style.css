@@ -921,14 +921,17 @@ td button {
 
   html,
   body {
+    display: block !important;
     width: 74mm !important;
     min-width: 0 !important;
+    height: auto !important;
+    min-height: 0 !important;
     margin: 0 !important;
     padding: 0 !important;
+    overflow: visible !important;
     background: #fff !important;
     color: #000 !important;
     font-family: Tahoma, Arial, sans-serif !important;
-    font-size: 11px !important;
   }
 
   body * {
@@ -946,62 +949,68 @@ td button {
     top: 0 !important;
     right: 0 !important;
     width: 74mm !important;
-    padding: 0 !important;
+    height: auto !important;
     margin: 0 !important;
-    color: #000 !important;
+    padding: 0 !important;
+    overflow: visible !important;
     background: #fff !important;
+    color: #000 !important;
+    font-size: 11px !important;
+    line-height: 1.5 !important;
   }
 
   #printArea h1,
   #printArea h2,
   #printArea h3,
   #printArea p {
-    margin: 3px 0;
+    margin: 3px 0 !important;
+    color: #000 !important;
   }
 
   #printArea h1 {
-    font-size: 18px;
-    text-align: center;
+    font-size: 20px !important;
+    text-align: center !important;
   }
 
   #printArea .receipt-center {
-    text-align: center;
+    text-align: center !important;
   }
 
   #printArea .receipt-divider {
-    border-top: 1px dashed #000;
-    margin: 7px 0;
+    border-top: 1px dashed #000 !important;
+    margin: 7px 0 !important;
   }
 
   #printArea table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 10px;
-    white-space: normal;
+    display: table !important;
+    width: 100% !important;
+    border-collapse: collapse !important;
+    white-space: normal !important;
+    font-size: 10px !important;
+  }
+
+  #printArea thead {
+    display: table-header-group !important;
+  }
+
+  #printArea tr {
+    break-inside: avoid !important;
   }
 
   #printArea th,
   #printArea td {
-    padding: 4px 2px;
-    border-bottom: 1px dashed #aaa;
+    padding: 4px 2px !important;
+    border-bottom: 1px dashed #aaa !important;
+    background: #fff !important;
     color: #000 !important;
   }
 
-  #printArea th {
-    background: #fff;
-  }
-
   #printArea .receipt-total {
-    font-size: 15px;
-    font-weight: 900;
+    font-size: 15px !important;
+    font-weight: 900 !important;
   }
 
   #printArea .receipt-small {
-    font-size: 9px;
-  }
-
-  .topbar,
-  .wrap {
-    display: none !important;
+    font-size: 9px !important;
   }
 }
