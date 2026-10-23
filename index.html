@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#17130d">
+  <meta name="description" content="نظام ديرتي لإدارة فواتير السائقين والنقد والشبكة والآجل والسداد وإقفال الدوام">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="ديرتي فواتير">
+
+  <title>ديرتي | نظام فواتير السائقين</title>
+
+  <link rel="manifest" href="./manifest.json">
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./style.css">
+</head>
+
+<body>
+
+<header class="topbar">
+  <div class="brand-wrap">
+    <div class="brand-mark">د</div>
+    <div>
+      <div class="brand">ديرتي <span>للمأكولات السعودية</span></div>
+      <div class="sub">نظام الكاشير وفواتير السائقين</div>
+    </div>
+  </div>
+
+  <div class="top-actions">
+    <button class="secondary" onclick="exportData()">⬇ نسخة احتياطية</button>
+
+    <button class="secondary"
+      onclick="document.getElementById('importFile').click()">
+      ⬆ استعادة نسخة
+    </button>
+
+    <button id="installBtn"
+      class="install-btn hidden"
+      onclick="installApp()">
+      📲 تثبيت التطبيق
+    </button>
+
+    <input id="importFile"
+      type="file"
+      accept="application/json,.json"
+      class="hidden"
+      onchange="importData(event)">
+  </div>
+</header>
+
+<main class="wrap">
+
+  <div class="notice">
+    🔒 تُحفظ البيانات تلقائيًا على الجهاز والمتصفح.
+    احتفظ بنسخة احتياطية بصورة دورية.
+  </div>
+
+  <!-- الإحصائيات -->
+  <section class="stats">
+
+    <div class="stat">
+      <span>السائقون</span>
+      <strong id="driverCount">0</strong>
+      <small>سائق مسجل</small>
+    </div>
+
+    <div class="stat">
+      <span>الفواتير</span>
+      <strong id="invoiceCount">0</strong>
+      <small>فاتورة محفوظة</small>
+    </div>
+
+    <div class="stat">
+      <span>المبالغ الآجلة</span>
+      <strong id="openTotal">0 ر.س</strong>
+      <small>المتبقي على السائقين</small>
+    </div>
+
+    <div class="stat">
+      <span>فواتير اليوم</span>
+      <strong id="todayTotal">0 ر.س</strong>
+      <small>إجمالي الفواتير المسجلة اليوم</small>
+    </div>
+
+  </section>
+
+  <!-- التنقل -->
+  <nav class="tabs">
+    <button onclick="showTab('account')">⚡ الكاشير</button>
+    <button class="secondary" onclick="showTab('single')">＋ فاتورة مستقلة</button>
+    <button class="secondary" onclick="showTab('drivers')">♟ السائقون والسداد</button>
+    <button class="secondary" onclick="showTab('items')">▦ الأصناف والأسعار</button>
+    <button class="secondary" onclick="showTab('history')">▤ سجل الفواتير</button>
+    <button class="secondary" onclick="showTab('shifts')">🧾 إقفال الدوام</button>
+  </nav>
+
+  <!-- =========================
+       شاشة الكاشير
+  ========================== -->
+  <section id="tab-account" class="tab">
+
+    <div class="cashier-head box">
+
+      <div>
+        <h2>شاشة الكاشير السريعة</h2>
+        <p class="muted">
+          اختر السائق، ثم اضغط على الأصناف لإضافتها إلى الفاتورة.
+        </p>
+      </div>
+
+      <div class="driver-picker">
+        <label>
+          السائق الحالي
+          <select id="accountDriver" onchange="renderAccount()"></select>
+        </label>
+
+        <button class="secondary" onclick="showTab('drivers')">
+          ＋ إدارة السائقين
+        </button>
+      </div>
+
+    </div>
+
+    <div class="cashier-layout">
+
+      <!-- الأصناف -->
+      <section class="box products-box">
+
+        <div class="section-title">
+          <h3>الأصناف المتاحة</h3>
+          <span class="live-tag">إضافة سريعة</span>
+        </div>
+
+        <input
+          id="productSearch"
+          class="search"
+          placeholder="ابحث عن صنف..."
+          oninput="renderQuickItems()">
+
+        <div id="quickItems" class="quick-items"></div>
+
+        <div class="quick-footer">
+          💡 اضغط على الصنف لإضافته إلى الفاتورة الحالية.
+        </div>
+
+      </section>
+
+      <!-- الفاتورة الحالية -->
+      <section class="box invoice-box">
+
+        <div class="invoice-head">
+
+          <div>
+            <span class="eyebrow">الفاتورة الحالية</span>
+            <h3 id="currentDriverTitle">فاتورة السائق</h3>
+          </div>
+
+          <span class="autosave">● حفظ تلقائي</span>
+
+        </div>
+
+        <div class="table-wrap">
+          <table class="invoice-table">
+
+            <thead>
+              <tr>
+                <th>الصنف</th>
+                <th>الكمية</th>
+                <th>السعر</th>
+                <th>الإجمالي</th>
+                <th>حذف</th>
+              </tr>
+            </thead>
+
+            <tbody id="accountRows"></tbody>
+
+          </table>
+        </div>
+
+        <label>
+          ملاحظة الفاتورة
+          <input id="accountNote" placeholder="ملاحظة اختيارية">
+        </label>
+
+        <div class="invoice-summary">
+          <span>إجمالي الفاتورة</span>
+
+          <strong>
+            <b id="accountTotal">0</b>
+            <small>ر.س</small>
+          </strong>
+        </div>
+
+        <!-- توزيع الدفع -->
+        <div class="payment-box">
+
+          <h3>💳 طريقة التحصيل</h3>
+
+          <div class="formgrid">
+
+            <label>
+              نقدًا (كاش)
+              <input
+                id="paymentCash"
+                type="number"
+                min="0"
+                step="0.01"
+                inputmode="decimal"
+                value="0"
+                oninput="updateAccountPayment()">
+            </label>
+
+            <label>
+              الشبكة
+              <input
+                id="paymentCard"
+                type="number"
+                min="0"
+                step="0.01"
+                inputmode="decimal"
+                value="0"
+                oninput="updateAccountPayment()">
+            </label>
+
+          </div>
+
+          <div class="payment-result">
+            <span>المتبقي آجلًا</span>
+            <strong id="paymentRemaining">0.00 ر.س</strong>
+          </div>
+
+          <p class="muted">
+            الآجل هو قيمة الفاتورة التي لم تُحصّل نقدًا أو بالشبكة.
+          </p>
+
+        </div>
+
+        <div class="invoice-actions">
+
+          <button class="print-btn" onclick="printAccount()">
+            🖨 معاينة وطباعة
+          </button>
+
+          <button class="secondary" onclick="saveAccount()">
+            💾 حفظ مؤقت
+          </button>
+
+          <button class="danger" onclick="clearAccountConfirm()">
+            تفريغ الفاتورة
+          </button>
+
+          <button class="close-btn" onclick="closeAccount()">
+            🧾 حفظ الفاتورة
+          </button>
+
+        </div>
+
+        <p class="muted footnote">
+          كل مرة تحفظ فيها الفاتورة يُنشأ سجل مستقل.
+          وتبقى الفواتير السابقة محفوظة حتى بعد إنشاء فاتورة جديدة.
+        </p>
+
+      </section>
+
+    </div>
+
+  </section>
+
+  <!-- =========================
+       فاتورة مستقلة
+  ========================== -->
+  <section id="tab-single" class="tab hidden">
+
+    <div class="layout">
+
+      <div class="box">
+
+        <h2>إنشاء فاتورة مستقلة</h2>
+
+        <div class="formgrid">
+
+          <label>
+            السائق
+            <select id="singleDriver"></select>
+          </label>
+
+          <label>
+            ملاحظة
+            <input id="singleNote" placeholder="اختياري">
+          </label>
+
+        </div>
+
+        <label>
+          الصنف
+          <select id="singleItem" onchange="setSinglePrice()"></select>
+        </label>
+
+        <div class="formgrid">
+
+          <label>
+            الكمية
+            <input
+              id="singleQty"
+              type="number"
+              min="0.01"
+              step="0.01"
+              value="1">
+          </label>
+
+          <label>
+            السعر
+            <input
+              id="singlePrice"
+              type="number"
+              min="0"
+              step="0.01">
+          </label>
+
+        </div>
+
+        <button onclick="addSingleLine()">＋ إضافة الصنف</button>
+
+        <div class="scroll" style="margin-top:12px">
+
+          <table>
+            <thead>
+              <tr>
+                <th>الصنف</th>
+                <th>الكمية</th>
+                <th>السعر</th>
+                <th>الإجمالي</th>
+                <th>حذف</th>
+              </tr>
+            </thead>
+
+            <tbody id="singleRows"></tbody>
+          </table>
+
+        </div>
+
+        <div class="total">
+          الإجمالي:
+          <span id="singleTotal">0.00</span>
+          ريال
+        </div>
+
+        <div class="payment-box">
+
+          <h3>طريقة الدفع</h3>
+
+          <div class="formgrid">
+
+            <label>
+              نقدًا
+              <input
+                id="singleCash"
+                type="number"
+                min="0"
+                step="0.01"
+                value="0"
+                oninput="updateSinglePayment()">
+            </label>
+
+            <label>
+              الشبكة
+              <input
+                id="singleCard"
+                type="number"
+                min="0"
+                step="0.01"
+                value="0"
+                oninput="updateSinglePayment()">
+            </label>
+
+          </div>
+
+          <div class="payment-result">
+            <span>المتبقي آجلًا</span>
+            <strong id="singleRemaining">0.00 ر.س</strong>
+          </div>
+
+        </div>
+
+        <button class="green" onclick="saveSingleInvoice()">
+          💾 حفظ وطباعة الفاتورة
+        </button>
+
+      </div>
+
+      <div class="box help-card">
+
+        <h2>معلومات الفاتورة</h2>
+
+        <p class="muted">
+          تُحفظ الفاتورة برقم مستقل ويمكن الرجوع إليها من سجل الفواتير.
+        </p>
+
+        <p class="muted">
+          إذا كان هناك مبلغ غير محصّل، يُضاف إلى رصيد السائق الآجل.
+        </p>
+
+      </div>
+
+    </div>
+
+  </section>
+
+  <!-- =========================
+       السائقون والسداد
+  ========================== -->
+  <section id="tab-drivers" class="tab hidden">
+
+    <div class="layout">
+
+      <div class="box">
+
+        <h2>إضافة سائق</h2>
+
+        <label>
+          اسم السائق
+          <input id="driverName" placeholder="اسم السائق">
+        </label>
+
+        <label>
+          رقم الجوال
+          <input id="driverPhone" placeholder="05xxxxxxxx">
+        </label>
+
+        <button onclick="addDriver()">حفظ السائق</button>
+
+      </div>
+
+      <div class="box">
+
+        <h2>حسابات السائقين</h2>
+
+        <div class="scroll">
+
+          <table>
+            <thead>
+              <tr>
+                <th>السائق</th>
+                <th>الجوال</th>
+                <th>الرصيد الآجل</th>
+                <th>إجراء</th>
+              </tr>
+            </thead>
+
+            <tbody id="driversRows"></tbody>
+
+          </table>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="box" style="margin-top:18px">
+
+      <h2>سجل السداد والتحصيل</h2>
+
+      <p class="muted">
+        سجّل أي مبلغ يسدده السائق لاحقًا، وسيُخصم من رصيده المستحق.
+      </p>
+
+      <div class="scroll">
+
+        <table>
+          <thead>
+            <tr>
+              <th>التاريخ</th>
+              <th>السائق</th>
+              <th>المبلغ</th>
+              <th>طريقة السداد</th>
+              <th>ملاحظة</th>
+            </tr>
+          </thead>
+
+          <tbody id="repaymentRows"></tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  </section>
+
+  <!-- =========================
+       الأصناف
+  ========================== -->
+  <section id="tab-items" class="tab hidden">
+
+    <div class="layout">
+
+      <div class="box">
+
+        <h2>إضافة صنف</h2>
+
+        <label>
+          اسم الصنف
+          <input id="itemName" placeholder="مثال: حبة مندي">
+        </label>
+
+        <label>
+          السعر بالريال
+          <input
+            id="itemPrice"
+            type="number"
+            min="0"
+            step="0.01"
+            placeholder="0">
+        </label>
+
+        <button onclick="addItem()">حفظ الصنف</button>
+
+      </div>
+
+      <div class="box">
+
+        <h2>الأصناف والأسعار</h2>
+
+        <div class="scroll">
+
+          <table>
+            <thead>
+              <tr>
+                <th>الصنف</th>
+                <th>السعر</th>
+                <th>إجراء</th>
+              </tr>
+            </thead>
+
+            <tbody id="itemsRows"></tbody>
+
+          </table>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+  <!-- =========================
+       سجل الفواتير
+  ========================== -->
+  <section id="tab-history" class="tab hidden">
+
+    <div class="box">
+
+      <h2>سجل الفواتير</h2>
+
+      <div class="row">
+
+        <label>
+          البحث
+          <input
+            id="historySearch"
+            oninput="renderHistory()"
+            placeholder="اسم السائق أو رقم الفاتورة">
+        </label>
+
+        <label>
+          نوع الفاتورة
+          <select id="historyType" onchange="renderHistory()">
+            <option value="all">كل الفواتير</option>
+            <option value="single">فواتير مستقلة</option>
+            <option value="closed">فواتير الكاشير</option>
+          </select>
+        </label>
+
+      </div>
+
+      <div class="scroll">
+
+        <table>
+
+          <thead>
+            <tr>
+              <th>رقم الفاتورة</th>
+              <th>النوع</th>
+              <th>السائق</th>
+              <th>التاريخ</th>
+              <th>الإجمالي</th>
+              <th>المحصّل</th>
+              <th>الآجل</th>
+              <th>إجراء</th>
+            </tr>
+          </thead>
+
+          <tbody id="historyRows"></tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  </section>
+
+  <!-- =========================
+       إقفال الدوام
+  ========================== -->
+  <section id="tab-shifts" class="tab hidden">
+
+    <div class="box">
+
+      <h2>إقفال دوام السائق</h2>
+
+      <p class="muted">
+        اختر السائق من شاشة الكاشير، ثم اضغط إقفال الدوام.
+        سيظهر ملخص فواتير الدوام والمبالغ المحصلة والآجلة.
+      </p>
+
+      <div class="shift-actions">
+        <button class="close-btn" onclick="closeShift()">
+          🔒 إقفال دوام السائق المحدد
+        </button>
+      </div>
+
+      <div class="scroll" style="margin-top:18px">
+
+        <table>
+          <thead>
+            <tr>
+              <th>التاريخ</th>
+              <th>السائق</th>
+              <th>عدد الفواتير</th>
+              <th>الإجمالي</th>
+              <th>النقد</th>
+              <th>الشبكة</th>
+              <th>آجل الدوام</th>
+              <th>رصيد السائق</th>
+            </tr>
+          </thead>
+
+          <tbody id="shiftRows"></tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  </section>
+
+  <div id="printArea" class="hidden"></div>
+  <div id="toast" role="status"></div>
+
+</main>
+
+<script src="./app.js"></script>
+
+</body>
+</html>
