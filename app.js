@@ -1127,94 +1127,123 @@ function showInvoiceDetails(invoiceId) {
 
 /* ---------- الطباعة الحرارية ---------- */
 
-function printInvoice(invoiceId) {
-  const invoice = db.invoices.find(item => item.id === invoiceId);
-  if (!invoice) return;
+function printFinalInvoiceRecord(invoice) {
+  const driver = getDriver(invoice.driverId);
 
-  printReceipt(invoice);
-}
-
-function printReceipt(invoice) {
-  const printArea = document.getElementById("printArea");
-
-  if (!printArea || !invoice) {
-    alert("تعذر تجهيز الفاتورة للطباعة.");
-    return;
-  }
-
-  const items = Array.isArray(invoice.items) ? invoice.items : [];
-
-  const rows = items.map(item => `
+  const rows = invoice.items.map((item, index) => `
     <tr>
-      <td>
-        ${esc(item.name)}
-        <br>
-        <small>${money(item.qty)} × ${money(item.price)}</small>
+      <td class="f-item">
+        <strong>${esc(item.name)}</strong>
+        <div class="f-detail">
+          ${money(item.qty)} × ${money(item.price)} ر.س
+        </div>
       </td>
-      <td>${money(num(item.qty) * num(item.price))}</td>
+      <td class="f-amount">
+        ${money(num(item.qty) * num(item.price))}
+      </td>
     </tr>
   `).join("");
 
-  printArea.innerHTML = `
-    <div class="receipt-center">
-      <h1>ديرتي</h1>
-      <h3>للمأكولات السعودية</h3>
-      <p>فاتورة مبيعات</p>
+  setHTML("printArea", `
+    <div class="final-receipt">
+
+      <header class="f-header">
+        <h1>ديرتي</h1>
+        <div class="f-subtitle">للمأكولات السعودية</div>
+        <div class="f-title">فاتورة ختامية</div>
+      </header>
+
+      <div class="f-divider"></div>
+
+      <section class="f-info">
+        <div class="f-info-row">
+          <span>رقم الفاتورة</span>
+          <strong>${esc(invoice.code)}</strong>
+        </div>
+
+        <div class="f-info-row">
+          <span>السائق</span>
+          <strong>${esc(driver?.name || "—")}</strong>
+        </div>
+
+        <div class="f-info-row">
+          <span>التاريخ</span>
+          <strong>${esc(new Date(invoice.createdAt).toLocaleString("ar-SA"))}</strong>
+        </div>
+
+        <div class="f-info-row">
+          <span>الفواتير المجمعة</span>
+          <strong>${(invoice.sourceInvoiceIds || []).length}</strong>
+        </div>
+      </section>
+
+      <div class="f-divider"></div>
+
+      <table class="f-table">
+        <thead>
+          <tr>
+            <th>الصنف والكمية والسعر</th>
+            <th>الإجمالي</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows}
+        </tbody>
+      </table>
+
+      <div class="f-divider"></div>
+
+      <section class="f-totals">
+        <div class="f-total-row">
+          <span>الإجمالي قبل الخصم</span>
+          <strong>${money(invoice.gross)} ر.س</strong>
+        </div>
+
+        <div class="f-total-row">
+          <span>الخصم</span>
+          <strong>${money(invoice.discount)} ر.س</strong>
+        </div>
+
+        <div class="f-grand-total">
+          <span>الإجمالي النهائي</span>
+          <strong>${money(invoice.total)} ر.س</strong>
+        </div>
+      </section>
+
+      <div class="f-divider"></div>
+
+      <section class="f-payments">
+        <div class="f-payment-row">
+          <span>💵 نقدًا</span>
+          <strong>${money(invoice.cashPaid)} ر.س</strong>
+        </div>
+
+        <div class="f-payment-row">
+          <span>💳 الشبكة</span>
+          <strong>${money(invoice.cardPaid)} ر.س</strong>
+        </div>
+
+        <div class="f-credit-row">
+          <span>المتبقي آجلًا</span>
+          <strong>${money(invoice.credit)} ر.س</strong>
+        </div>
+      </section>
+
+      <div class="f-divider"></div>
+
+      <footer class="f-footer">
+        <strong>شكرًا لزيارتكم مطعم ديرتي</strong>
+        <div>نتشرف بخدمتكم دائمًا</div>
+      </footer>
+
     </div>
+  `);
 
-    <div class="receipt-divider"></div>
-
-    <p>رقم الفاتورة: ${esc(invoice.code || "—")}</p>
-    <p>السائق: ${esc(driverName(invoice.driverId))}</p>
-    <p>التاريخ: ${esc(
-      invoice.createdAt
-        ? new Date(invoice.createdAt).toLocaleString("ar-SA")
-        : nowText()
-    )}</p>
-
-    <div class="receipt-divider"></div>
-
-    <table>
-      <thead>
-        <tr>
-          <th>الصنف</th>
-          <th>الإجمالي</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${rows}
-      </tbody>
-    </table>
-
-    <div class="receipt-divider"></div>
-
-    <p class="receipt-total">
-      إجمالي الفاتورة: ${money(invoice.total)} ريال
-    </p>
-
-    <p>نقدًا: ${money(invoice.cashPaid)} ريال</p>
-    <p>الشبكة: ${money(invoice.cardPaid)} ريال</p>
-    <p>المتبقي آجلًا: ${money(invoiceRemaining(invoice))} ريال</p>
-
-    ${invoice.note
-      ? `<p>ملاحظة: ${esc(invoice.note)}</p>`
-      : ""}
-
-    <div class="receipt-divider"></div>
-
-    <p class="receipt-center">شكرًا لزيارتكم مطعم ديرتي</p>
-  `;
-
-  // تأكد من إظهار منطقة الفاتورة قبل الطباعة
+  const printArea = document.getElementById("printArea");
   printArea.classList.remove("hidden");
 
   setTimeout(() => {
     window.print();
-
-    // إخفاء الفاتورة بعد انتهاء نافذة الطباعة
-    setTimeout(() => {
-      printArea.classList.add("hidden");
-    }, 500);
   }, 300);
 }
 /* ---------- الإحصائيات والعرض ---------- */
