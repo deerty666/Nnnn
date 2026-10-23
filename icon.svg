@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="512"
+     height="512"
+     viewBox="0 0 512 512">
+
+  <defs>
+    <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#292419"/>
+      <stop offset="100%" stop-color="#080808"/>
+    </linearGradient>
+
+    <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffe99a"/>
+      <stop offset="45%" stop-color="#d4af37"/>
+      <stop offset="100%" stop-color="#a77a16"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="512" height="512" rx="100" fill="url(#background)"/>
+
+  <rect x="18" y="18" width="476" height="476" rx="86"
+        fill="none" stroke="url(#gold)" stroke-width="8"/>
+
+  <circle cx="256" cy="190" r="104"
+          fill="none" stroke="url(#gold)" stroke-width="12"/>
+
+  <path d="M195 208
+           C205 164 231 143 260 143
+           C289 143 311 165 319 208
+           C300 195 280 190 257 190
+           C233 190 213 196 195 208Z"
+        fill="url(#gold)"/>
+
+  <path d="M183 222
+           C205 208 230 201 256 201
+           C282 201 307 208 329 222
+           L329 236
+           C305 222 282 217 256 217
+           C230 217 207 222 183 236Z"
+        fill="url(#gold)"/>
+
+  <text x="256" y="338"
+        font-family="Tahoma, Arial, sans-serif"
+        font-size="74"
+        font-weight="900"
+        text-anchor="middle"
+        fill="url(#gold)"
+        direction="rtl">ديرتي</text>
+
+  <path d="M125 365 H387"
+        stroke="url(#gold)"
+        stroke-width="4"
+        stroke-linecap="round"/>
+
+  <text x="256" y="407"
+        font-family="Tahoma, Arial, sans-serif"
+        font-size="27"
+        font-weight="700"
+        text-anchor="middle"
+        fill="#f5e5b0"
+        direction="rtl">فواتير السائقين</text>
+
+  <circle cx="256" cy="450" r="5" fill="url(#gold)"/>
+
+</svg>
