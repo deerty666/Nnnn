@@ -448,7 +448,7 @@ function renderQuickItems() {
           type="number"
           min="1"
           step="1"
-          value="1"
+          value=""
           inputmode="numeric"
           aria-label="كمية ${esc(item.name)}"
         >
@@ -501,7 +501,7 @@ function addProductToCart(id) {
     });
   }
 
-  if (input) input.value = "1";
+  if (input) input.value = "";
 
   renderCart();
   updatePayment();
