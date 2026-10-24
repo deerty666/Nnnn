@@ -889,9 +889,36 @@ function printDailyReport() {
 
   const items = aggregateItems(invoices);
 
+  // تجميع حسابات السائقين
+  const driversMap = new Map();
+
+  invoices.forEach(invoice => {
+    const id = invoice.driverId || invoice.driverName;
+
+    if (!driversMap.has(id)) {
+      driversMap.set(id, {
+        name: invoice.driverName || "غير معروف",
+        count: 0,
+        total: 0,
+        cash: 0,
+        card: 0
+      });
+    }
+
+    const driver = driversMap.get(id);
+
+    driver.count++;
+    driver.total += Number(invoice.total || 0);
+    driver.cash += Number(invoice.cash || 0);
+    driver.card += Number(invoice.card || 0);
+  });
+
+  const drivers = [...driversMap.values()];
+
   area.innerHTML = `
     <div class="print-receipt daily-print" dir="rtl">
-      <h2>ديرتي</h2>
+
+      <h2>مطعم ديرتي</h2>
       <h3>تقرير الأصناف اليومي</h3>
 
       <p>التاريخ: ${dateLabel(date)}</p>
@@ -914,11 +941,41 @@ function printDailyReport() {
             <tr>
               <td class="name">${esc(item.name)}</td>
               <td class="qty">${item.qty}</td>
-              <td class="price">${item.price.toLocaleString("en-US", { maximumFractionDigits: 2 })}</td>
-              <td class="sum">${item.total.toLocaleString("en-US", { maximumFractionDigits: 2 })}</td>
+              <td class="price">${Number(item.price).toLocaleString("en-US")}</td>
+              <td class="sum">${Number(item.total).toLocaleString("en-US")}</td>
             </tr>
           `).join("") || `
-            <tr><td colspan="4">لا توجد أصناف</td></tr>
+            <tr>
+              <td colspan="4">لا توجد أصناف</td>
+            </tr>
+          `}
+        </tbody>
+      </table>
+
+      <div class="rule"></div>
+
+      <h3>ملخص حسابات السائقين</h3>
+
+      <table>
+        <thead>
+          <tr>
+            <th class="name">اسم السائق</th>
+            <th class="qty">الفواتير</th>
+            <th class="sum">الإجمالي</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          ${drivers.map(driver => `
+            <tr>
+              <td class="name">${esc(driver.name)}</td>
+              <td class="qty">${driver.count}</td>
+              <td class="sum">${Number(driver.total).toLocaleString("en-US")}</td>
+            </tr>
+          `).join("") || `
+            <tr>
+              <td colspan="3">لا يوجد سائقون</td>
+            </tr>
           `}
         </tbody>
       </table>
@@ -932,13 +989,17 @@ function printDailyReport() {
 
       <div class="rule"></div>
 
+      <p style="text-align:center;font-weight:900">
+        ديرتي.. نكهة الأصالة
+      </p>
+
       <p style="text-align:center">شكراً لكم</p>
+
     </div>
   `;
 
   window.print();
 }
-
 /* =========================
    طباعة فاتورة السائق
 ========================= */
