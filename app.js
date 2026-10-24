@@ -47,13 +47,13 @@ function seedDB() {
     ],
 
     items: [
-      { id: uid(), name: "مندي دجاج", price: 50, category: "دجاج", active: true },
-      { id: uid(), name: "مظبي دجاج", price: 45, category: "دجاج", active: true },
-      { id: uid(), name: "مدفون دجاج", price: 50, category: "دجاج", active: true },
-      { id: uid(), name: "رز", price: 10, category: "أرز", active: true },
-      { id: uid(), name: "مندي لحم", price: 65, category: "لحم", active: true },
-      { id: uid(), name: "مشويات", price: 35, category: "مشويات", active: true },
-      { id: uid(), name: "مقبلات", price: 10, category: "مقبلات", active: true }
+      { id: uid(), name: "ربع دجاج رز شعبي", price: 8.50, category: "دجاج", active: true },
+      { id: uid(), name: "ربع دجاج رز بشاور", price: 9, category: "دجاج", active: true },
+      { id: uid(), name: "مشكل خضار", price: 10, category: "دجاج", active: true },
+      { id: uid(), name: "رز", price: 9, category: "أرز", active: true },
+      { id: uid(), name: "ببسي صغير", price: 3, category: "لحم", active: true },
+      { id: uid(), name: "ببسي وسط", price: 5, category: "مشويات", active: true },
+      { id: uid(), name: "ببسي كبير", price: 9, category: "مقبلات", active: true }
     ],
 
     invoices: []
