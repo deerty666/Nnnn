@@ -1137,6 +1137,7 @@ function renderAll() {
   updatePayment();
   renderHistory();
   renderReport();
+  renderReportDriverSelect();
 }
 
 /* تشغيل التطبيق */
