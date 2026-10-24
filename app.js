@@ -1968,91 +1968,169 @@ function printInvoice(invoice, isFinal = false) {
         window.print();
     }, 100);
 }
-
 function printDailyReport() {
     const date = todayKey();
     const stats = getDayStats(date);
 
-    const rows = db.drivers.map(driver => {
-        const driverStats = getDriverDayStats(driver.id, date);
+    // الفواتير الفعلية فقط، مع استبعاد الفواتير التي
+    // تم دمجها في فاتورة نهائية حتى لا يتكرر الحساب.
+    const invoices = getEffectiveInvoicesForDay(date)
+        .sort((a, b) => new Date(a.time) - new Date(b.time));
 
-        if (!driverStats.count) {
-            return "";
+    const driverGroups = new Map();
+
+    invoices.forEach(invoice => {
+        if (!driverGroups.has(invoice.driverId)) {
+            driverGroups.set(invoice.driverId, {
+                name: invoice.driverName,
+                invoices: [],
+                total: 0,
+                cash: 0,
+                card: 0,
+                remaining: 0
+            });
         }
 
+        const group = driverGroups.get(invoice.driverId);
+
+        group.invoices.push(invoice);
+        group.total += numeric(invoice.total);
+        group.cash += numeric(invoice.cash);
+        group.card += numeric(invoice.card);
+        group.remaining += numeric(invoice.remaining);
+    });
+
+    const driverHTML = [...driverGroups.values()].map(group => {
+        const invoicesHTML = group.invoices.map(invoice => {
+            const itemRows = (invoice.lines || []).map(line => `
+                <tr>
+                    <td>${escapeHTML(line.name)}</td>
+                    <td>${numeric(line.qty)}</td>
+                    <td>${money(line.price)}</td>
+                    <td>${money(numeric(line.qty) * numeric(line.price))}</td>
+                </tr>
+            `).join("");
+
+            return `
+                <div class="daily-invoice">
+                    <h3>
+                        فاتورة رقم #${invoice.number}
+                        ${invoice.type === "final" ? "(نهائية)" : ""}
+                    </h3>
+
+                    <p>
+                        الوقت: ${escapeHTML(formatTime(invoice.time))}
+                    </p>
+
+                    <table class="daily-items-table">
+                        <thead>
+                            <tr>
+                                <th>الصنف</th>
+                                <th>الكمية</th>
+                                <th>سعر الوحدة</th>
+                                <th>الإجمالي</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            ${itemRows || `
+                                <tr>
+                                    <td colspan="4">
+                                        لا توجد أصناف محفوظة في هذه الفاتورة
+                                    </td>
+                                </tr>
+                            `}
+                        </tbody>
+                    </table>
+
+                    <div class="daily-invoice-totals">
+                        <p>إجمالي الفاتورة: ${money(invoice.total)}</p>
+                        <p>النقد: ${money(invoice.cash)}</p>
+                        <p>الشبكة: ${money(invoice.card)}</p>
+                        <p>المتبقي: ${money(invoice.remaining)}</p>
+
+                        ${numeric(invoice.discount) > 0
+                            ? `<p>الخصم: ${money(invoice.discount)}</p>`
+                            : ""}
+                    </div>
+                </div>
+            `;
+        }).join("");
+
         return `
-            <tr>
-                <td>${escapeHTML(driver.name)}</td>
-                <td>${driverStats.count}</td>
-                <td>${money(driverStats.total)}</td>
-                <td>${money(driverStats.cash)}</td>
-                <td>${money(driverStats.card)}</td>
-                <td>${money(driverStats.remaining)}</td>
-            </tr>
+            <section class="daily-driver">
+                <h2>السائق: ${escapeHTML(group.name)}</h2>
+
+                <div class="daily-driver-summary">
+                    <p>إجمالي الحساب: ${money(group.total)}</p>
+                    <p>النقد: ${money(group.cash)}</p>
+                    <p>الشبكة: ${money(group.card)}</p>
+                    <p>المتبقي: ${money(group.remaining)}</p>
+                </div>
+
+                ${invoicesHTML}
+            </section>
         `;
     }).join("");
 
     const printArea = getElement("printArea");
 
+    if (!printArea) {
+        showToast("منطقة الطباعة غير موجودة.", "error");
+        return;
+    }
+
     printArea.innerHTML = `
-        <div class="receipt">
+        <div class="daily-report">
 
-            <h1>ديرتي</h1>
-            <h2>التقرير اليومي</h2>
+            <header class="daily-report-header">
+                <h1>ديرتي</h1>
+                <h2>التقرير اليومي التفصيلي</h2>
+                <p>${escapeHTML(formatDate(new Date(date + "T12:00:00")))}</p>
+            </header>
 
-            <p>${escapeHTML(formatDate(new Date()))}</p>
+            <section class="daily-grand-summary">
+                <div>
+                    <span>إجمالي المبيعات</span>
+                    <strong>${money(stats.total)}</strong>
+                </div>
 
-            <div class="receipt-line"></div>
+                <div>
+                    <span>النقد</span>
+                    <strong>${money(stats.cash)}</strong>
+                </div>
 
-            <div class="receipt-total">
-                <span>المبيعات</span>
-                <span>${money(stats.total)}</span>
-            </div>
+                <div>
+                    <span>الشبكة</span>
+                    <strong>${money(stats.card)}</strong>
+                </div>
 
-            <div class="receipt-total">
-                <span>النقد</span>
-                <span>${money(stats.cash)}</span>
-            </div>
+                <div>
+                    <span>المتبقي</span>
+                    <strong>${money(stats.remaining)}</strong>
+                </div>
 
-            <div class="receipt-total">
-                <span>الشبكة</span>
-                <span>${money(stats.card)}</span>
-            </div>
+                <div>
+                    <span>عدد الفواتير</span>
+                    <strong>${stats.count}</strong>
+                </div>
+            </section>
 
-            <div class="receipt-total">
-                <span>المتبقي</span>
-                <span>${money(stats.remaining)}</span>
-            </div>
+            ${driverHTML || `
+                <p class="daily-empty">
+                    لا توجد فواتير مسجلة لهذا اليوم.
+                </p>
+            `}
 
-            <div class="receipt-line"></div>
-
-            <table>
-                <thead>
-                    <tr>
-                        <th>السائق</th>
-                        <th>عدد</th>
-                        <th>الحساب</th>
-                        <th>نقد</th>
-                        <th>شبكة</th>
-                        <th>متبقي</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                    ${rows || `
-                        <tr>
-                            <td colspan="6">لا توجد حسابات</td>
-                        </tr>
-                    `}
-                </tbody>
-            </table>
+            <footer class="daily-report-footer">
+                نهاية التقرير — مطعم ديرتي
+            </footer>
 
         </div>
     `;
 
-    setTimeout(() => window.print(), 100);
+    setTimeout(() => window.print(), 200);
 }
-
 
 /* =====================================================
    تصفير جميع الحسابات
