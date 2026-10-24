@@ -1141,6 +1141,32 @@ function renderAll() {
 }
 
 /* تشغيل التطبيق */
+function renderReportDriverSelect() {
+  const select = $("reportDriver");
+
+  if (!select) return;
+
+  const previous = select.value || "all";
+
+  select.innerHTML = `
+    <option value="all">جميع السائقين</option>
+
+    ${db.drivers
+      .map(driver => `
+        <option value="${esc(driver.id)}">
+          ${esc(driver.name)}
+        </option>
+      `)
+      .join("")}
+  `;
+
+  if (
+    previous === "all" ||
+    db.drivers.some(driver => driver.id === previous)
+  ) {
+    select.value = previous;
+  }
+}
 function initialize() {
   if (!$("reportDate").value) {
     $("reportDate").value = todayISO();
