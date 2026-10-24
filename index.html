@@ -1,0 +1,686 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <meta name="theme-color" content="#211913">
+  <meta name="description" content="ديرتي - حسابات السائقين اليومية وإدارة المنتجات والتقارير">
+
+  <title>ديرتي | حسابات السائقين</title>
+
+  <link rel="manifest" href="./manifest.json">
+  <link rel="stylesheet" href="./style.css">
+</head>
+
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="brand-mark">د</div>
+
+    <div>
+      <h1>ديرتي</h1>
+      <p>حسابات السائقين اليومية</p>
+    </div>
+  </div>
+
+  <button
+    id="installBtn"
+    class="btn btn-outline"
+    hidden
+    onclick="installApp()"
+  >
+    تثبيت التطبيق
+  </button>
+</header>
+
+<main class="container">
+
+  <!-- ملخص الحسابات -->
+  <section class="summary-grid">
+
+    <article class="summary-card">
+      <span>إجمالي اليوم</span>
+      <strong id="headerTodayTotal">0 ر.س</strong>
+    </article>
+
+    <article class="summary-card">
+      <span>النقد المستلم</span>
+      <strong id="headerTodayCash">0 ر.س</strong>
+    </article>
+
+    <article class="summary-card">
+      <span>الشبكة</span>
+      <strong id="headerTodayCard">0 ر.س</strong>
+    </article>
+
+    <article class="summary-card">
+      <span>المتبقي</span>
+      <strong id="headerTodayCredit">0 ر.س</strong>
+    </article>
+
+  </section>
+
+  <!-- القائمة الرئيسية -->
+  <nav class="main-nav" aria-label="التنقل">
+
+    <button class="nav-btn active" data-tab="home">
+      الرئيسية
+    </button>
+
+    <button class="nav-btn" data-tab="account">
+      حساب جديد
+    </button>
+
+    <button class="nav-btn" data-tab="drivers">
+      السائقون
+    </button>
+
+    <button class="nav-btn" data-tab="items">
+      المنتجات
+    </button>
+
+    <button class="nav-btn" data-tab="reports">
+      التقارير
+    </button>
+
+  </nav>
+
+  <!-- =========================
+       الصفحة الرئيسية
+  ========================== -->
+
+  <section id="tab-home" class="tab-panel active">
+
+    <div class="section-heading">
+
+      <div>
+        <h2>ملخص اليوم</h2>
+        <p>نظرة سريعة على حسابات السائقين</p>
+      </div>
+
+      <button
+        class="btn btn-primary"
+        onclick="showTab('account')"
+      >
+        ＋ حساب جديد
+      </button>
+
+    </div>
+
+    <div class="stats-row">
+
+      <div class="stat-box">
+        <span>عدد السائقين</span>
+        <strong id="driverCount">0</strong>
+      </div>
+
+      <div class="stat-box">
+        <span>عدد الفواتير</span>
+        <strong id="homeInvoiceCount">0</strong>
+      </div>
+
+      <div class="stat-box">
+        <span>عدد المنتجات</span>
+        <strong id="itemCount">0</strong>
+      </div>
+
+    </div>
+
+    <div class="card">
+
+      <div class="section-heading">
+
+        <div>
+          <h3>حسابات اليوم</h3>
+          <p>الفواتير التي تم تسجيلها اليوم</p>
+        </div>
+
+        <button
+          class="btn btn-secondary"
+          onclick="showTab('reports')"
+        >
+          عرض التقرير
+        </button>
+
+      </div>
+
+      <div class="table-wrap">
+
+        <table>
+
+          <thead>
+            <tr>
+              <th>رقم</th>
+              <th>السائق</th>
+              <th>الإجمالي</th>
+              <th>النقد</th>
+              <th>الشبكة</th>
+              <th>المتبقي</th>
+            </tr>
+          </thead>
+
+          <tbody id="homeRows"></tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  </section>
+
+  <!-- =========================
+       حساب جديد
+  ========================== -->
+
+  <section id="tab-account" class="tab-panel">
+
+    <div class="section-heading">
+
+      <div>
+        <h2>حساب جديد</h2>
+        <p>
+          اختر السائق، واكتب الكمية، ثم أضف المنتج بضغطة واحدة
+        </p>
+      </div>
+
+    </div>
+
+    <div class="card form-grid">
+
+      <label>
+        السائق
+
+        <select id="accountDriver">
+          <option value="">اختر السائق</option>
+        </select>
+
+      </label>
+
+      <label class="wide">
+        ملاحظات (اختياري)
+
+        <input
+          id="accountNote"
+          type="text"
+          placeholder="مثال: طلب توصيل أو ملاحظة"
+        >
+
+      </label>
+
+    </div>
+
+    <div class="section-heading compact">
+
+      <div>
+        <h3>المنتجات السريعة</h3>
+        <p>اكتب الكمية بجانب المنتج ثم اضغط إضافة</p>
+      </div>
+
+      <input
+        id="productSearch"
+        class="search-input"
+        type="search"
+        placeholder="بحث عن منتج..."
+      >
+
+    </div>
+
+    <!-- المنتجات تظهر هنا تلقائياً -->
+    <div id="quickItems" class="product-grid"></div>
+
+    <div class="card">
+
+      <div class="section-heading">
+
+        <div>
+          <h3>أصناف الحساب</h3>
+          <p>
+            المنتج المتكرر بنفس السعر يجتمع في سطر واحد
+          </p>
+        </div>
+
+      </div>
+
+      <div class="table-wrap">
+
+        <table>
+
+          <thead>
+            <tr>
+              <th>الصنف</th>
+              <th>سعر الوحدة</th>
+              <th>الكمية</th>
+              <th>الإجمالي</th>
+              <th></th>
+            </tr>
+          </thead>
+
+          <tbody id="accountRows"></tbody>
+
+        </table>
+
+      </div>
+
+      <div class="totals-panel">
+
+        <div>
+          <span>إجمالي الحساب</span>
+          <strong id="accountTotal">0 ر.س</strong>
+        </div>
+
+      </div>
+
+      <div class="payment-grid">
+
+        <label>
+          النقد المستلم
+
+          <input
+            id="paymentCash"
+            type="number"
+            min="0"
+            step="0.01"
+            placeholder="0"
+          >
+        </label>
+
+        <label>
+          الشبكة المستلمة
+
+          <input
+            id="paymentCard"
+            type="number"
+            min="0"
+            step="0.01"
+            placeholder="0"
+          >
+        </label>
+
+        <div>
+          <span>إجمالي المدفوع</span>
+          <strong id="paymentPaid">0 ر.س</strong>
+        </div>
+
+        <div>
+          <span>المتبقي</span>
+          <strong id="paymentRemaining">0 ر.س</strong>
+        </div>
+
+      </div>
+
+      <div class="actions">
+
+        <button
+          class="btn btn-primary"
+          onclick="closeAccount()"
+        >
+          حفظ الحساب وطباعة
+        </button>
+
+        <button
+          class="btn btn-secondary"
+          onclick="clearAccountConfirm()"
+        >
+          مسح الحساب الحالي
+        </button>
+
+      </div>
+
+    </div>
+
+  </section>
+
+  <!-- =========================
+       إدارة السائقين
+  ========================== -->
+
+  <section id="tab-drivers" class="tab-panel">
+
+    <div class="section-heading">
+
+      <div>
+        <h2>إدارة السائقين</h2>
+        <p>إضافة السائقين وتعديل بياناتهم</p>
+      </div>
+
+    </div>
+
+    <div class="card form-grid">
+
+      <label>
+        اسم السائق
+
+        <input
+          id="driverName"
+          type="text"
+          placeholder="اسم السائق"
+        >
+      </label>
+
+      <label>
+        رقم الجوال
+
+        <input
+          id="driverPhone"
+          type="tel"
+          placeholder="05xxxxxxxx"
+        >
+      </label>
+
+      <div class="form-action">
+
+        <button
+          id="addDriverBtn"
+          class="btn btn-primary"
+          onclick="addDriver()"
+        >
+          إضافة سائق
+        </button>
+
+      </div>
+
+    </div>
+
+    <div class="card">
+
+      <div class="table-wrap">
+
+        <table>
+
+          <thead>
+            <tr>
+              <th>الاسم</th>
+              <th>الجوال</th>
+              <th>الحالة</th>
+              <th>إجراءات</th>
+            </tr>
+          </thead>
+
+          <tbody id="driversRows"></tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  </section>
+
+  <!-- =========================
+       إدارة المنتجات
+  ========================== -->
+
+  <section id="tab-items" class="tab-panel">
+
+    <div class="section-heading">
+
+      <div>
+        <h2>إدارة المنتجات</h2>
+        <p>أضف المنتجات والأسعار مرة واحدة لتظهر في الحسابات</p>
+      </div>
+
+    </div>
+
+    <div class="card form-grid">
+
+      <label>
+        اسم المنتج
+
+        <input
+          id="itemName"
+          type="text"
+          placeholder="مثال: مندي دجاج"
+        >
+      </label>
+
+      <label>
+        السعر (ر.س)
+
+        <input
+          id="itemPrice"
+          type="number"
+          min="0"
+          step="0.01"
+          placeholder="50"
+        >
+      </label>
+
+      <label>
+        التصنيف (اختياري)
+
+        <input
+          id="itemCategory"
+          type="text"
+          placeholder="دجاج، رز، مشويات"
+        >
+      </label>
+
+      <div class="form-action">
+
+        <button
+          id="addItemBtn"
+          class="btn btn-primary"
+          onclick="addItem()"
+        >
+          إضافة منتج
+        </button>
+
+      </div>
+
+    </div>
+
+    <div class="card">
+
+      <div class="table-wrap">
+
+        <table>
+
+          <thead>
+            <tr>
+              <th>المنتج</th>
+              <th>التصنيف</th>
+              <th>السعر</th>
+              <th>إجراءات</th>
+            </tr>
+          </thead>
+
+          <tbody id="itemsRows"></tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  </section>
+
+  <!-- =========================
+       التقارير
+  ========================== -->
+
+  <section id="tab-reports" class="tab-panel">
+
+    <div class="section-heading">
+
+      <div>
+        <h2>التقارير</h2>
+        <p>
+          تقرير يومي مفصل مع تجميع المنتجات المتطابقة بالاسم والسعر
+        </p>
+      </div>
+
+    </div>
+
+    <div class="card report-controls">
+
+      <label>
+        تاريخ التقرير
+
+        <input id="reportDate" type="date">
+      </label>
+
+      <button
+        class="btn btn-primary"
+        onclick="printDailyReport()"
+      >
+        طباعة التقرير المفصل
+      </button>
+
+      <button
+        class="btn btn-danger"
+        onclick="clearAllAccountsConfirm()"
+      >
+        مسح جميع الفواتير
+      </button>
+
+    </div>
+
+    <div class="summary-grid report-summary">
+
+      <article class="summary-card">
+        <span>إجمالي اليوم</span>
+        <strong id="dailyTotal">0 ر.س</strong>
+      </article>
+
+      <article class="summary-card">
+        <span>النقد</span>
+        <strong id="dailyCash">0 ر.س</strong>
+      </article>
+
+      <article class="summary-card">
+        <span>الشبكة</span>
+        <strong id="dailyCard">0 ر.س</strong>
+      </article>
+
+      <article class="summary-card">
+        <span>المتبقي</span>
+        <strong id="dailyCredit">0 ر.س</strong>
+      </article>
+
+    </div>
+
+    <div class="card">
+
+      <h3>تفاصيل الفواتير</h3>
+
+      <div class="table-wrap">
+
+        <table>
+
+          <thead>
+            <tr>
+              <th>رقم</th>
+              <th>السائق</th>
+              <th>النوع</th>
+              <th>الإجمالي</th>
+              <th>نقد</th>
+              <th>شبكة</th>
+              <th>متبقي</th>
+            </tr>
+          </thead>
+
+          <tbody id="dayRows"></tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+    <div class="card">
+
+      <div class="section-heading">
+
+        <div>
+          <h3>سجل الفواتير</h3>
+        </div>
+
+        <input
+          id="historySearch"
+          class="search-input"
+          type="search"
+          placeholder="بحث برقم الفاتورة أو السائق"
+        >
+
+        <select id="historyType">
+          <option value="all">كل الفواتير</option>
+          <option value="single">الحسابات العادية</option>
+          <option value="final">الفواتير النهائية</option>
+        </select>
+
+      </div>
+
+      <div class="table-wrap">
+
+        <table>
+
+          <thead>
+            <tr>
+              <th>رقم</th>
+              <th>التاريخ</th>
+              <th>السائق</th>
+              <th>النوع</th>
+              <th>الإجمالي</th>
+              <th>نقد</th>
+              <th>شبكة</th>
+              <th>متبقي</th>
+              <th>إجراءات</th>
+            </tr>
+          </thead>
+
+          <tbody id="historyRows"></tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  </section>
+
+</main>
+
+<!-- منطقة الطباعة -->
+<div id="printArea"></div>
+
+<!-- رسائل التنبيه -->
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<!-- نافذة التأكيد -->
+<div id="confirmModal" class="modal">
+
+  <div class="modal-card">
+
+    <h3 id="confirmTitle">تأكيد</h3>
+
+    <p id="confirmMessage"></p>
+
+    <div class="actions">
+
+      <button
+        id="confirmActionBtn"
+        class="btn btn-danger"
+      >
+        تأكيد
+      </button>
+
+      <button
+        class="btn btn-secondary"
+        onclick="closeConfirm()"
+      >
+        إلغاء
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+<script src="./app.js"></script>
+
+</body>
+</html>
