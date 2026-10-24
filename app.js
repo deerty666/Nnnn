@@ -883,46 +883,62 @@ function aggregateItems(invoices) {
 
 function printDailyReport() {
   const date = $("reportDate").value || todayISO();
-  const invoices = getInvoicesForDate(date);
-  const stats = getStats(date);
-  const area = $("printArea");
+  const selectedDriver = $("reportDriver")?.value || "all";
 
+  let invoices = getInvoicesForDate(date);
+
+  // اختيار فواتير السائق المحدد فقط
+  if (selectedDriver !== "all") {
+    invoices = invoices.filter(invoice =>
+      invoice.driverId === selectedDriver
+    );
+  }
+
+  if (!invoices.length) {
+    toast("لا توجد فواتير لهذا الاختيار في هذا اليوم", "error");
+    return;
+  }
+
+  const area = $("printArea");
   const items = aggregateItems(invoices);
 
-  // تجميع حسابات السائقين
-  const driversMap = new Map();
+  const total = invoices.reduce(
+    (sum, invoice) => sum + Number(invoice.total || 0),
+    0
+  );
 
-  invoices.forEach(invoice => {
-    const id = invoice.driverId || invoice.driverName;
+  const cash = invoices.reduce(
+    (sum, invoice) => sum + Number(invoice.cash || 0),
+    0
+  );
 
-    if (!driversMap.has(id)) {
-      driversMap.set(id, {
-        name: invoice.driverName || "غير معروف",
-        count: 0,
-        total: 0,
-        cash: 0,
-        card: 0
-      });
-    }
+  const card = invoices.reduce(
+    (sum, invoice) => sum + Number(invoice.card || 0),
+    0
+  );
 
-    const driver = driversMap.get(id);
+  const remaining = Math.max(0, total - cash - card);
 
-    driver.count++;
-    driver.total += Number(invoice.total || 0);
-    driver.cash += Number(invoice.cash || 0);
-    driver.card += Number(invoice.card || 0);
-  });
+  const driverNames = [
+    ...new Set(
+      invoices.map(invoice => invoice.driverName || "غير معروف")
+    )
+  ];
 
-  const drivers = [...driversMap.values()];
+  const title = selectedDriver === "all"
+    ? "تقرير الأصناف اليومي"
+    : `تقرير السائق: ${driverNames.join("، ")}`;
 
   area.innerHTML = `
     <div class="print-receipt daily-print" dir="rtl">
 
       <h2>مطعم ديرتي</h2>
-      <h3>تقرير الأصناف اليومي</h3>
+
+      <h3>${esc(title)}</h3>
 
       <p>التاريخ: ${dateLabel(date)}</p>
-      <p>عدد الفواتير: ${stats.count}</p>
+
+      <p>عدد الفواتير: ${invoices.length}</p>
 
       <div class="rule"></div>
 
@@ -941,51 +957,26 @@ function printDailyReport() {
             <tr>
               <td class="name">${esc(item.name)}</td>
               <td class="qty">${item.qty}</td>
-              <td class="price">${Number(item.price).toLocaleString("en-US")}</td>
-              <td class="sum">${Number(item.total).toLocaleString("en-US")}</td>
+              <td class="price">
+                ${Number(item.price).toLocaleString("en-US")}
+              </td>
+              <td class="sum">
+                ${Number(item.total).toLocaleString("en-US")}
+              </td>
             </tr>
-          `).join("") || `
-            <tr>
-              <td colspan="4">لا توجد أصناف</td>
-            </tr>
-          `}
+          `).join("")}
         </tbody>
       </table>
 
       <div class="rule"></div>
 
-      <h3>ملخص حسابات السائقين</h3>
+      <p><strong>إجمالي الحساب: ${fmt(total)}</strong></p>
 
-      <table>
-        <thead>
-          <tr>
-            <th class="name">اسم السائق</th>
-            <th class="qty">الفواتير</th>
-            <th class="sum">الإجمالي</th>
-          </tr>
-        </thead>
+      <p>النقد: ${fmt(cash)}</p>
 
-        <tbody>
-          ${drivers.map(driver => `
-            <tr>
-              <td class="name">${esc(driver.name)}</td>
-              <td class="qty">${driver.count}</td>
-              <td class="sum">${Number(driver.total).toLocaleString("en-US")}</td>
-            </tr>
-          `).join("") || `
-            <tr>
-              <td colspan="3">لا يوجد سائقون</td>
-            </tr>
-          `}
-        </tbody>
-      </table>
+      <p>الشبكة: ${fmt(card)}</p>
 
-      <div class="rule"></div>
-
-      <p><strong>إجمالي اليوم: ${fmt(stats.total)}</strong></p>
-      <p>النقد: ${fmt(stats.cash)}</p>
-      <p>الشبكة: ${fmt(stats.card)}</p>
-      <p>المتبقي: ${fmt(stats.credit)}</p>
+      <p><strong>المتبقي: ${fmt(remaining)}</strong></p>
 
       <div class="rule"></div>
 
