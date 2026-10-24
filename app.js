@@ -1329,7 +1329,9 @@ function prepareFinalInvoice() {
     const merged = new Map();
 
     allLines.forEach(line => {
-        const key = `${line.itemId || line.name}|${numeric(line.price)}`;
+        
+const key = `${line.itemId || normalizeName(line.name)}|${roundMoney(line.price)}`;
+                     
 
         if (!merged.has(key)) {
             merged.set(key, {
