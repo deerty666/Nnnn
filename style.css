@@ -615,59 +615,80 @@ td button {
   #printArea .print-receipt {
     width: 74mm;
     max-width: 74mm;
-    font-family: Arial, sans-serif;
-    font-size: 11px;
-    line-height: 1.45;
+    font-family: Arial, Tahoma, sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.7;
     color: #000;
     direction: rtl;
-  }
+}
 
-  #printArea h2,
-  #printArea h3 {
+#printArea h2,
+#printArea .print-receipt h2 {
+    font-size: 23px;
+    font-weight: 900;
     text-align: center;
-    margin: 3px 0;
-  }
+    margin: 5px 0;
+}
 
-  #printArea p {
-    margin: 3px 0;
-  }
+#printArea h3,
+#printArea .print-receipt h3 {
+    font-size: 16px;
+    font-weight: 800;
+    text-align: center;
+    margin: 5px 0 10px;
+}
 
-  #printArea table {
+#printArea p,
+#printArea .print-receipt p {
+    font-size: 13px;
+    font-weight: 600;
+    margin: 5px 0;
+}
+
+#printArea table {
     width: 100%;
     min-width: 0;
     table-layout: fixed;
     border-collapse: collapse;
-    font-size: 10px;
-  }
+    font-size: 12px;
+    font-weight: 700;
+}
 
-  #printArea th,
-  #printArea td {
+#printArea th,
+#printArea td {
     white-space: normal;
-    padding: 3px 1px;
+    padding: 6px 2px;
     text-align: center;
-    border-bottom: 1px dotted #888;
+    border-bottom: 1px dashed #777;
     overflow-wrap: anywhere;
-  }
+    color: #000;
+}
 
-  #printArea .name {
+#printArea th {
+    font-weight: 900;
+    border-top: 1px solid #000;
+    border-bottom: 2px solid #000;
+}
+
+#printArea .name {
     text-align: right;
     width: 36%;
-  }
+}
 
-  #printArea .qty {
+#printArea .qty {
     width: 12%;
-  }
+}
 
-  #printArea .price {
+#printArea .price {
     width: 23%;
-  }
+}
 
-  #printArea .sum {
+#printArea .sum {
     width: 29%;
-  }
+}
 
-  #printArea .rule {
-    border-top: 1px dashed #000;
-    margin: 7px 0;
-  }
+#printArea .rule {
+    border-top: 2px dashed #000;
+    margin: 9px 0;
 }
