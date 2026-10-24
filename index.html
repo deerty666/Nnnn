@@ -516,18 +516,26 @@
 
     <div class="card report-controls">
 
-      <label>
-        تاريخ التقرير
+     <label>
+  تاريخ التقرير
 
-        <input id="reportDate" type="date">
-      </label>
+  <input id="reportDate" type="date">
+</label>
 
-      <button
-        class="btn btn-primary"
-        onclick="printDailyReport()"
-      >
-        طباعة التقرير المفصل
-      </button>
+<label>
+  اختر السائق
+
+  <select id="reportDriver">
+    <option value="all">جميع السائقين</option>
+  </select>
+</label>
+
+<button
+  class="btn btn-primary"
+  onclick="printDailyReport()"
+>
+  طباعة تقرير السائق
+</button>
 
       <button
         class="btn btn-danger"
