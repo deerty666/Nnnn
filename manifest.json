@@ -1,0 +1,22 @@
+{
+  "id": "./",
+  "name": "ديرتي | حسابات السائقين اليومية",
+  "short_name": "حسابات ديرتي",
+  "description": "تطبيق حسابات السائقين اليومية وإدارة المنتجات والفواتير لمطعم ديرتي",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f5f2ed",
+  "theme_color": "#211913",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
